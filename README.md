@@ -6,5 +6,6 @@ dummy change 2.0 -rossmr
 dummy change 3.0 -maxmichalec
 
 Names: 
-Madi Arnold
-Michael Ross
+- Madi Arnold
+- Michael Ross
+- Maxwell Michalec
