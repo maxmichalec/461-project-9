@@ -1,2 +1,3 @@
-tsc run.ts 
-node run.js
+#!/bin/bash
+tsc run.ts
+node run.js "$@"
