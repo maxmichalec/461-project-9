@@ -30,6 +30,12 @@ function processUrls(urlFile: string) {
   
     // Now you have an array of URLs, and you can work with them as needed
     console.log(urls);
+<<<<<<< HEAD:run.ts
+=======
+    var l_metric = license_metric(urls[0]); 
+    console.log('License Metric:', l_metric); 
+
+>>>>>>> e000da2 (More changes to license_metric):src/run.ts
   } catch (err) {
     console.error('Error:', err);
   }
