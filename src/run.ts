@@ -34,15 +34,6 @@ function runTests() {
   // Add code to run your test suite here
   // You can use testing frameworks like Jest, Mocha, etc.
 
-
-  //ES-Lint execution at root:
-  //module.exports = {
-    //extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended'],
-    //parser: '@typescript-eslint/parser',
-    //plugins: ['@typescript-eslint'],
-    //root: true,
-  //};
-
   // Replace the above comment with your actual test suite command.
 
   console.log('Running tests...');
