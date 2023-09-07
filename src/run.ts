@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 import * as fs from 'fs';
-import { exec } from 'child_process';
 import { license_metric } from './license_metric';
 
 // Function to process URL_FILE and produce NDJSON output
