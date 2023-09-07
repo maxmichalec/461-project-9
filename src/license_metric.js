@@ -42,7 +42,6 @@ var fs = require("fs");
 var fse = require("fs-extra");
 var isomorphic_git_1 = require("isomorphic-git");
 var node_1 = require("isomorphic-git/http/node");
-var path = require('path');
 var compatibleLicenses = [
     'MIT License',
     'BSD 2-Clause "Simplified" License',
@@ -84,7 +83,8 @@ function cloneRepository(repoUrl, localPath) {
     });
 }
 function license_metric(repoURL) {
-    var repoDir = './temp_repo';
+    var repoDir = '../../../../temp_repo'; //NEED TO FIGURE OUT WHERE TO PUT THE LOCAL REPO BC IT IS NOT CLONING IN ANOTHER GIT REPO
+    console.log(repoDir);
     fse.ensureDir(repoDir); //will make sure the directory exists or will create a new one
     console.log(repoURL);
     cloneRepository(repoURL, repoDir); //this clones the repo into the directory
@@ -92,7 +92,7 @@ function license_metric(repoURL) {
     var readmePath = "".concat(repoDir, "/README.md");
     var readmeContent = fs.readFileSync(readmePath, 'utf-8');
     //looks for the licensing heading with a regex 
-    var licenseHeading = readmeContent.match(/(License|Licence)\s*([-:]\s*)?([\w\s-]+)(\n|:|,|;|\(|\)|\r|$)/i);
+    var licenseHeading = readmeContent.match(/(License)\s*([-:]\s*)?([\w\s-]+)(\n|:|,|;|\(|\)|\r|$)/i);
     //Find where the License information is and compare it with the compatible licenses
     if (licenseHeading && licenseHeading[1]) {
         var licenseText = licenseHeading[1].trim();

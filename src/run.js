@@ -3,17 +3,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var fs = require("fs");
 var license_metric_1 = require("./license_metric");
-// Function to install dependencies
-function installDependencies() {
-    // Add your dependency installation commands here
-    // For example, to use npm for Node.js dependencies:
-    var childProcess = require('child_process');
-    childProcess.execSync('npm install --save fs-extra isomorphic-git', { stdio: 'inherit' });
-    // You can add more commands as needed.
-    // Replace the above comment with actual installation commands.
-    console.log('Dependencies installed successfully.');
-    process.exit(0);
-}
 // Function to process URL_FILE and produce NDJSON output
 function processUrls(urlFile) {
     // Add code to process URLs and generate NDJSON output here
@@ -45,10 +34,7 @@ function runTests() {
 }
 // Main CLI
 var args = process.argv.slice(2);
-if (args[0] == 'install') {
-    installDependencies();
-}
-else if (args[0] == 'test') {
+if (args[0] == 'test') {
     runTests();
 }
 else {

@@ -2,19 +2,6 @@
 import * as fs from 'fs';
 import { exec } from 'child_process';
 import { license_metric } from './license_metric';
-// Function to install dependencies
-function installDependencies() {
-  // Add your dependency installation commands here
-  // For example, to use npm for Node.js dependencies:
-  const childProcess = require('child_process');
-  childProcess.execSync('npm install --save fs-extra isomorphic-git', { stdio: 'inherit' });
-  // You can add more commands as needed.
-
-  // Replace the above comment with actual installation commands.
-
-  console.log('Dependencies installed successfully.');
-  process.exit(0);
-}
 
 // Function to process URL_FILE and produce NDJSON output
 function processUrls(urlFile: string) {
@@ -57,11 +44,7 @@ function runTests() {
 // Main CLI
 const args = process.argv.slice(2);
 
-if(args[0] == 'install')
-{
-    installDependencies(); 
-} 
-else if(args[0] == 'test')
+if(args[0] == 'test')
 {
     runTests();
 }

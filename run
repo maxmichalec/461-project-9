@@ -1,3 +1,16 @@
 #!/bin/bash
-tsc src/run.ts
-node src/run.js "$@"
+
+if [ "$1" == "install" ]; then 
+    echo "Installing modules..." 
+    #npm install message 
+    npm install fs || echo "Error: fs not installed correctly"
+    npm install child_process || echo "Error: child_process not installed correctly"
+    npm install fs-extra || echo "Error: fs-extra not installed correctly"
+    npm install isomorphic-git || echo "Error: isomorphic-git not installed correctly"
+    echo "Modules installed successfully."
+else 
+    tsc src/run.ts
+    node src/run.js "$@"
+fi
+
+exit 0 
