@@ -42,10 +42,12 @@ var fs = require("fs");
 var fse = require("fs-extra");
 var isomorphic_git_1 = require("isomorphic-git");
 var node_1 = require("isomorphic-git/http/node");
+var axios_1 = require("axios");
 var compatibleLicenses = [
-    'MIT License',
-    'BSD 2-Clause "Simplified" License',
-    'MIT license'
+    'mit license',
+    'bsd 2-clause "simplified" license',
+    /(mit.*license|license.*mit)/i,
+    'mit'
 ];
 function cloneRepository(repoUrl, localPath) {
     return __awaiter(this, void 0, void 0, function () {
@@ -82,28 +84,92 @@ function cloneRepository(repoUrl, localPath) {
         });
     });
 }
-function license_metric(repoURL) {
-    var repoDir = '../../../../temp_repo'; //NEED TO FIGURE OUT WHERE TO PUT THE LOCAL REPO BC IT IS NOT CLONING IN ANOTHER GIT REPO
-    console.log(repoDir);
-    fse.ensureDir(repoDir); //will make sure the directory exists or will create a new one
-    console.log(repoURL);
-    cloneRepository(repoURL, repoDir); //this clones the repo into the directory
-    //Reads in the cloned repository
-    var readmePath = "".concat(repoDir, "/README.md");
-    var readmeContent = fs.readFileSync(readmePath, 'utf-8');
-    //looks for the licensing heading with a regex 
-    var licenseHeading = readmeContent.match(/(License)\s*([-:]\s*)?([\w\s-]+)(\n|:|,|;|\(|\)|\r|$)/i);
-    //Find where the License information is and compare it with the compatible licenses
-    if (licenseHeading && licenseHeading[1]) {
-        var licenseText = licenseHeading[1].trim();
-        //check if there is an identified license that is compataible
-        for (var _i = 0, compatibleLicenses_1 = compatibleLicenses; _i < compatibleLicenses_1.length; _i++) {
-            var compatibleLicense = compatibleLicenses_1[_i];
-            if (licenseText.includes(compatibleLicense)) {
-                return 1; //License found was compatible 
+function findGitHubRepoUrl(packageName) {
+    return __awaiter(this, void 0, void 0, function () {
+        var response, packageMetadata, error_2;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 2, , 3]);
+                    return [4 /*yield*/, axios_1.default.get("https://registry.npmjs.org/".concat(packageName))];
+                case 1:
+                    response = _a.sent();
+                    if (response.status !== 200) {
+                        console.error("Failed to fetch package metadata for ".concat(packageName));
+                        return [2 /*return*/, 'none'];
+                    }
+                    packageMetadata = response.data;
+                    console.log(packageMetadata.repository);
+                    console.log(packageMetadata.repository.url);
+                    // Check if the "repository" field exists in the package.json
+                    if (packageMetadata.repository && packageMetadata.repository.url) {
+                        return [2 /*return*/, packageMetadata.repository.url.match(/github\.com\/[^/]+\/[^/]+(?=\.git|$)/)];
+                    }
+                    else {
+                        console.log("No repository URL found for ".concat(packageName));
+                        return [2 /*return*/, 'none'];
+                    }
+                    return [3 /*break*/, 3];
+                case 2:
+                    error_2 = _a.sent();
+                    console.error("Error fetching package.json for ".concat(packageName, ": ").concat(error_2.message));
+                    return [2 /*return*/, 'none'];
+                case 3: return [2 /*return*/];
             }
-        }
-    }
-    return 0;
+        });
+    });
+}
+function license_metric(repoURL, num) {
+    return __awaiter(this, void 0, void 0, function () {
+        var repoDir, url, parts, readmePath, readmeContent, _i, compatibleLicenses_1, compatibleLicense;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    repoDir = "C:/Users/Madi Arnold/Desktop/".concat(num);
+                    //looks into tmpdir to make a temporay directory and then deleting at the end of the function 
+                    console.log(repoDir);
+                    fse.ensureDir(repoDir); //will make sure the directory exists or will create a new one
+                    url = repoURL.replace(/^(https?:\/\/)?(www\.)?/i, '');
+                    parts = url.split('/');
+                    if (!(parts[0] === 'npmjs.com')) return [3 /*break*/, 2];
+                    console.log("This is a npmjs url");
+                    //finds the github url of the npmjs module
+                    console.log("This is the npmjs package ".concat(parts[2]));
+                    return [4 /*yield*/, findGitHubRepoUrl(parts[2])];
+                case 1:
+                    repoURL = _a.sent();
+                    repoURL = 'https://' + repoURL;
+                    if (repoURL == null) {
+                        console.log("This npmjs is not stored in a github repository.");
+                        return [2 /*return*/, 0];
+                    }
+                    _a.label = 2;
+                case 2:
+                    console.log(repoURL);
+                    //probably need to add in something to check if the url is from github just to make sure 
+                    return [4 /*yield*/, cloneRepository(repoURL, repoDir)];
+                case 3:
+                    //probably need to add in something to check if the url is from github just to make sure 
+                    _a.sent(); //clones the repository
+                    readmePath = "".concat(repoDir, "/Readme.md");
+                    readmeContent = 'none';
+                    if (fs.existsSync(readmePath)) {
+                        readmeContent = fs.readFileSync(readmePath, 'utf-8').toLowerCase();
+                    }
+                    readmePath = "".concat(repoDir, "/readme.markdown");
+                    if (fs.existsSync(readmePath)) {
+                        readmeContent = fs.readFileSync(readmePath, 'utf-8').toLowerCase();
+                    }
+                    //NEED TO REMOVE THE CLONED DIRECTORY AFTER USING IT
+                    for (_i = 0, compatibleLicenses_1 = compatibleLicenses; _i < compatibleLicenses_1.length; _i++) {
+                        compatibleLicense = compatibleLicenses_1[_i];
+                        if (readmeContent.match(compatibleLicense)) {
+                            return [2 /*return*/, 1]; //License found was compatible 
+                        }
+                    }
+                    return [2 /*return*/, 0];
+            }
+        });
+    });
 }
 exports.license_metric = license_metric;

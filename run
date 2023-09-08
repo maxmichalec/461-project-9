@@ -6,6 +6,9 @@ if [ "$1" == "install" ]; then
     npm install fs || echo "Error: fs not installed correctly"
     npm install fs-extra || echo "Error: fs-extra not installed correctly"
     npm install isomorphic-git || echo "Error: isomorphic-git not installed correctly"
+    npm install typescript || echo "Error: typescript not installed correctly"
+    npm install @types/node || echo "Error: @types/node not installed correctly"
+    npm install axios || echo "Error: axios not installed correctly"
     echo "Modules installed successfully."
 else 
     tsc src/run.ts

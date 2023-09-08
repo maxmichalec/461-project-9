@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import { license_metric } from './license_metric';
 
 // Function to process URL_FILE and produce NDJSON output
-function processUrls(urlFile: string) {
+async function processUrls(urlFile: string) {
 
   // Add code to process URLs and generate NDJSON output here
   // You can use libraries like axios or node-fetch to fetch data from URLs.
@@ -17,10 +17,15 @@ function processUrls(urlFile: string) {
     const urls = fileContents.split('\n').filter(url => url.trim() !== '');
   
     // Now you have an array of URLs, and you can work with them as needed
-    console.log(urls);
-    var l_metric = license_metric(urls[0]); 
-    console.log('License Metric:', l_metric); 
-
+    console.log(urls); 
+    var l_metric; 
+    var number = 0; 
+    for(const url of urls) {
+      console.log(`The URL that is currently running is ${url}`);
+      l_metric = await license_metric(url, number); 
+      number = number + 1; 
+      console.log('License Metric:', l_metric); 
+    }
   } catch (err) {
     console.error('Error:', err);
   }
