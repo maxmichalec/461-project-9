@@ -37,7 +37,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.license_metric = void 0;
+exports.license_ramp_up_metric = void 0;
 var fs = require("fs");
 var fse = require("fs-extra");
 var isomorphic_git_1 = require("isomorphic-git");
@@ -120,14 +120,27 @@ function findGitHubRepoUrl(packageName) {
         });
     });
 }
-function license_metric(repoURL, num) {
+// Function to count words in a string
+function countWords(text) {
+    var words = text.split(/\s+/);
+    return words.length;
+}
+// Function to calculate the score based on word count
+function calculate_ramp_up_metric(wordCount, maxWordCount) {
+    var maxScore = 1.0; // Maximum score
+    // Calculate the score based on the word count relative to the max word count
+    return Math.min(wordCount / maxWordCount, maxScore);
+}
+function license_ramp_up_metric(repoURL, num) {
     return __awaiter(this, void 0, void 0, function () {
-        var tempDir, repoDir, url, parts, readmePath, readmeContent, _i, compatibleLicenses_1, compatibleLicense;
+        var tempDir, repoDir, license_met, ramp_up_met, url, parts, readmePath, readmeContent, _i, compatibleLicenses_1, compatibleLicense, wordCount, maxWordCount;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     tempDir = tmp.dirSync();
                     repoDir = tempDir.name;
+                    license_met = 0;
+                    ramp_up_met = 0;
                     //looks into tmpdir to make a temporay directory and then deleting at the end of the function 
                     console.log(repoDir);
                     fse.ensureDir(repoDir); //will make sure the directory exists or will create a new one
@@ -143,7 +156,7 @@ function license_metric(repoURL, num) {
                     repoURL = 'https://' + repoURL;
                     if (repoURL == null) {
                         console.log("This npmjs is not stored in a github repository.");
-                        return [2 /*return*/, 0];
+                        return [2 /*return*/, [license_met, ramp_up_met]];
                     }
                     _a.label = 2;
                 case 2:
@@ -164,6 +177,7 @@ function license_metric(repoURL, num) {
                             readmeContent = fs.readFileSync(readmePath, 'utf-8').toLowerCase();
                         }
                     }
+                    //deletes the temporary directory that was made
                     try {
                         fse.removeSync(repoDir);
                         console.log('Temporary directory deleted.');
@@ -171,15 +185,19 @@ function license_metric(repoURL, num) {
                     catch (err) {
                         console.error('Error deleting temporary directory:', err);
                     }
+                    //CALCULATES THE LICENSE SCORE 
                     for (_i = 0, compatibleLicenses_1 = compatibleLicenses; _i < compatibleLicenses_1.length; _i++) {
                         compatibleLicense = compatibleLicenses_1[_i];
                         if (readmeContent.match(compatibleLicense)) {
-                            return [2 /*return*/, 1]; //License found was compatible 
+                            license_met = 1; //License found was compatible 
                         }
                     }
-                    return [2 /*return*/, 0];
+                    wordCount = countWords(readmeContent);
+                    maxWordCount = 2000;
+                    ramp_up_met = calculate_ramp_up_metric(wordCount, maxWordCount); //calculates the actual score
+                    return [2 /*return*/, ([license_met, ramp_up_met])];
             }
         });
     });
 }
-exports.license_metric = license_metric;
+exports.license_ramp_up_metric = license_ramp_up_metric;

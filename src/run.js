@@ -38,11 +38,11 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var fs = require("fs");
-var license_metric_1 = require("./license_metric");
+var license_ramp_up_metric_1 = require("./license_ramp_up_metric");
 // Function to process URL_FILE and produce NDJSON output
 function processUrls(urlFile) {
     return __awaiter(this, void 0, void 0, function () {
-        var filePath, fileContents, urls, l_metric, number, _i, urls_1, url, err_1;
+        var filePath, fileContents, urls, l_r_metric_array, number, _i, urls_1, url, err_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -52,6 +52,7 @@ function processUrls(urlFile) {
                     urls = fileContents.split('\n').filter(function (url) { return url.trim() !== ''; });
                     // Now you have an array of URLs, and you can work with them as needed
                     console.log(urls);
+                    l_r_metric_array = void 0;
                     number = 0;
                     _i = 0, urls_1 = urls;
                     _a.label = 1;
@@ -59,11 +60,12 @@ function processUrls(urlFile) {
                     if (!(_i < urls_1.length)) return [3 /*break*/, 4];
                     url = urls_1[_i];
                     console.log("The URL that is currently running is ".concat(url));
-                    return [4 /*yield*/, (0, license_metric_1.license_metric)(url, number)];
+                    return [4 /*yield*/, (0, license_ramp_up_metric_1.license_ramp_up_metric)(url, number)];
                 case 2:
-                    l_metric = _a.sent();
+                    l_r_metric_array = _a.sent(); //returns license metric first and then ramp up metric
                     number = number + 1;
-                    console.log('License Metric:', l_metric);
+                    console.log('License Metric:', l_r_metric_array[0]);
+                    console.log('Ramp Up Metric:', l_r_metric_array[1]);
                     _a.label = 3;
                 case 3:
                     _i++;

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import * as fs from 'fs';
-import { license_metric } from './license_metric';
+import { license_ramp_up_metric } from './license_ramp_up_metric';
 
 // Function to process URL_FILE and produce NDJSON output
 async function processUrls(urlFile: string) {
@@ -17,14 +17,15 @@ async function processUrls(urlFile: string) {
     const urls = fileContents.split('\n').filter(url => url.trim() !== '');
   
     // Now you have an array of URLs, and you can work with them as needed
-    console.log(urls); 
-    var l_metric; 
+    console.log(urls);
+    let l_r_metric_array: number[];   
     var number = 0; 
     for(const url of urls) {
       console.log(`The URL that is currently running is ${url}`);
-      l_metric = await license_metric(url, number); 
+      l_r_metric_array = await license_ramp_up_metric(url, number); //returns license metric first and then ramp up metric
       number = number + 1; 
-      console.log('License Metric:', l_metric); 
+      console.log('License Metric:', l_r_metric_array[0]);
+      console.log('Ramp Up Metric:', l_r_metric_array[1]);  
     }
   } catch (err) {
     console.error('Error:', err);

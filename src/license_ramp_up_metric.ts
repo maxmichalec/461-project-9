@@ -13,7 +13,7 @@ const compatibleLicenses = [
     'mit'
 ];
 
-async function cloneRepository(repoUrl: string, localPath: string): Promise<void> { //NEED TO GET THIS TO WORK FOR GIT REPO AND NPMJS MODULES
+async function cloneRepository(repoUrl: string, localPath: string): Promise<void> { 
   try {
     // Clone the repository
     await git.clone({
@@ -66,9 +66,25 @@ async function findGitHubRepoUrl(packageName: string): Promise<string> {
   }
 } 
 
-export async function license_metric(repoURL: string, num: number): Promise<number> {
+// Function to count words in a string
+function countWords(text: string): number {
+  const words = text.split(/\s+/);
+  return words.length;
+}
+
+// Function to calculate the score based on word count
+function calculate_ramp_up_metric(wordCount: number, maxWordCount: number): number {
+  const maxScore = 1.0; // Maximum score
+    
+  // Calculate the score based on the word count relative to the max word count
+  return Math.min(wordCount / maxWordCount, maxScore); 
+}
+
+export async function license_ramp_up_metric(repoURL: string, num: number): Promise<number[]> {
     const tempDir = tmp.dirSync(); //makes a temporary directory
     const repoDir = tempDir.name; 
+    var license_met = 0;
+    var ramp_up_met = 0;  
     //looks into tmpdir to make a temporay directory and then deleting at the end of the function 
     console.log(repoDir);
     fse.ensureDir(repoDir); //will make sure the directory exists or will create a new one
@@ -84,7 +100,7 @@ export async function license_metric(repoURL: string, num: number): Promise<numb
       repoURL = 'https://' + repoURL; 
       if(repoURL == null) {
         console.log(`This npmjs is not stored in a github repository.`);
-        return 0;
+        return [license_met, ramp_up_met]; 
       }
     }
     console.log(repoURL);
@@ -113,10 +129,17 @@ export async function license_metric(repoURL: string, num: number): Promise<numb
       console.error('Error deleting temporary directory:', err);
     }
 
+    //CALCULATES THE LICENSE SCORE 
     for(const compatibleLicense of compatibleLicenses) {
       if(readmeContent.match(compatibleLicense)) {
-        return 1; //License found was compatible 
+        license_met = 1; //License found was compatible 
       }
     }
-    return 0; 
+
+    //CALCULATES THE RAMPUP SCORE 
+    const wordCount = countWords(readmeContent); //gets the number of words in the README
+    const maxWordCount = 2000; //NEED TO ADJUST THIS NUMBER BASED ON WHAT WE GET FROM DIFFERENT TEST RESULTS
+    ramp_up_met = calculate_ramp_up_metric(wordCount, maxWordCount); //calculates the actual score
+
+    return([license_met, ramp_up_met]); 
 }
