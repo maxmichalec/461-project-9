@@ -4,6 +4,7 @@ import * as fse from 'fs-extra';
 import git from 'isomorphic-git'; 
 import http from 'isomorphic-git/http/node';
 import axios from 'axios';
+import * as tmp from 'tmp';
 
 const compatibleLicenses = [
     'mit license', 
@@ -66,7 +67,8 @@ async function findGitHubRepoUrl(packageName: string): Promise<string> {
 } 
 
 export async function license_metric(repoURL: string, num: number): Promise<number> {
-    const repoDir = `C:/Users/Madi Arnold/Desktop/${num}`; //NEED TO FIGURE OUT WHERE TO PUT THE LOCAL REPO BC IT IS NOT CLONING IN ANOTHER GIT REPO
+    const tempDir = tmp.dirSync(); //makes a temporary directory
+    const repoDir = tempDir.name; 
     //looks into tmpdir to make a temporay directory and then deleting at the end of the function 
     console.log(repoDir);
     fse.ensureDir(repoDir); //will make sure the directory exists or will create a new one
@@ -103,7 +105,13 @@ export async function license_metric(repoURL: string, num: number): Promise<numb
       } 
     }
     
-    //NEED TO REMOVE THE CLONED DIRECTORY AFTER USING IT
+    //deletes the temporary directory that was made
+    try {
+      fse.removeSync(repoDir); 
+      console.log('Temporary directory deleted.');
+    } catch (err) {
+      console.error('Error deleting temporary directory:', err);
+    }
 
     for(const compatibleLicense of compatibleLicenses) {
       if(readmeContent.match(compatibleLicense)) {

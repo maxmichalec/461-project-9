@@ -43,6 +43,7 @@ var fse = require("fs-extra");
 var isomorphic_git_1 = require("isomorphic-git");
 var node_1 = require("isomorphic-git/http/node");
 var axios_1 = require("axios");
+var tmp = require("tmp");
 var compatibleLicenses = [
     'mit license',
     'bsd 2-clause "simplified" license',
@@ -121,11 +122,12 @@ function findGitHubRepoUrl(packageName) {
 }
 function license_metric(repoURL, num) {
     return __awaiter(this, void 0, void 0, function () {
-        var repoDir, url, parts, readmePath, readmeContent, _i, compatibleLicenses_1, compatibleLicense;
+        var tempDir, repoDir, url, parts, readmePath, readmeContent, _i, compatibleLicenses_1, compatibleLicense;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    repoDir = "C:/Users/Madi Arnold/Desktop/".concat(num);
+                    tempDir = tmp.dirSync();
+                    repoDir = tempDir.name;
                     //looks into tmpdir to make a temporay directory and then deleting at the end of the function 
                     console.log(repoDir);
                     fse.ensureDir(repoDir); //will make sure the directory exists or will create a new one
@@ -156,11 +158,19 @@ function license_metric(repoURL, num) {
                     if (fs.existsSync(readmePath)) {
                         readmeContent = fs.readFileSync(readmePath, 'utf-8').toLowerCase();
                     }
-                    readmePath = "".concat(repoDir, "/readme.markdown");
-                    if (fs.existsSync(readmePath)) {
-                        readmeContent = fs.readFileSync(readmePath, 'utf-8').toLowerCase();
+                    else {
+                        readmePath = "".concat(repoDir, "/readme.markdown");
+                        if (fs.existsSync(readmePath)) {
+                            readmeContent = fs.readFileSync(readmePath, 'utf-8').toLowerCase();
+                        }
                     }
-                    //NEED TO REMOVE THE CLONED DIRECTORY AFTER USING IT
+                    try {
+                        fse.removeSync(repoDir);
+                        console.log('Temporary directory deleted.');
+                    }
+                    catch (err) {
+                        console.error('Error deleting temporary directory:', err);
+                    }
                     for (_i = 0, compatibleLicenses_1 = compatibleLicenses; _i < compatibleLicenses_1.length; _i++) {
                         compatibleLicense = compatibleLicenses_1[_i];
                         if (readmeContent.match(compatibleLicense)) {
