@@ -104,7 +104,7 @@ function findGitHubRepoUrl(packageName) {
                     console.log(packageMetadata.repository.url);
                     // Check if the "repository" field exists in the package.json
                     if (packageMetadata.repository && packageMetadata.repository.url) {
-                        return [2 /*return*/, packageMetadata.repository.url.match(/github\.com\/[^/]+\/[^/]+(?=\.git|$)/)];
+                        return [2 /*return*/, 'https://' + packageMetadata.repository.url.match(/github\.com\/[^/]+\/[^/]+(?=\.git|$)/)];
                     }
                     else {
                         console.log("No repository URL found for ".concat(packageName));
@@ -153,7 +153,7 @@ function license_ramp_up_metric(repoURL, num) {
                     return [4 /*yield*/, findGitHubRepoUrl(parts[2])];
                 case 1:
                     repoURL = _a.sent();
-                    repoURL = 'https://' + repoURL;
+                    //repoURL = 'https://' + repoURL; 
                     if (repoURL == null) {
                         console.log("This npmjs is not stored in a github repository.");
                         return [2 /*return*/, [license_met, ramp_up_met]];

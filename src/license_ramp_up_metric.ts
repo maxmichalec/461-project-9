@@ -55,7 +55,7 @@ async function findGitHubRepoUrl(packageName: string): Promise<string> {
     console.log(packageMetadata.repository.url);
     // Check if the "repository" field exists in the package.json
     if (packageMetadata.repository && packageMetadata.repository.url) {
-      return packageMetadata.repository.url.match(/github\.com\/[^/]+\/[^/]+(?=\.git|$)/);
+      return 'https://' + packageMetadata.repository.url.match(/github\.com\/[^/]+\/[^/]+(?=\.git|$)/);
     } else {
       console.log(`No repository URL found for ${packageName}`);
       return 'none';
@@ -97,7 +97,6 @@ export async function license_ramp_up_metric(repoURL: string, num: number): Prom
       //finds the github url of the npmjs module
       console.log(`This is the npmjs package ${parts[2]}`);
       repoURL = await findGitHubRepoUrl(parts[2]);
-      repoURL = 'https://' + repoURL; 
       if(repoURL == null) {
         console.log(`This npmjs is not stored in a github repository.`);
         return [license_met, ramp_up_met]; 
