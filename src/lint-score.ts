@@ -1,3 +1,10 @@
+/*Will clean later: NOTES TO TEAM
+This code returns a value between 0 and 1 as a ratio to the number
+of errors and warnings outputted by ESLint. While Lint is primarly designed to run on libraries and depandices,
+I cannot think of a better way to check our own code for correctness and code standard, we can discuss at our meeting tmmrw on Sept 14th.
+NOTE: This code does not properally check error handling yet.
+*/
+
 import { execSync } from 'child_process';
 
 function getLintScore(): number {
