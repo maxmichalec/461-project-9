@@ -12,7 +12,10 @@ License Metric Calculation:
 The license_ramp_up_metric.ts file is found in the src folder.  This file houses the function that will calculate the License Metric.  This function will clone the git repository locally and then look at the README.md file.  In the README.md file, it will look for the "License" header and find out what License it has, and either return a 1 for a License that works or a 0 for a License that doesn't work. 
 
 Ramp-Up Metric Calculation: 
-The license_ramp_up_metric.ts file is found in the src folder.  This file houses the function that will calculate the License Metric.  This function will clone the git repository locally and then look the the README.md file.  It will look at the total number of words in the README.md file to calculate a score for the Ramp-Up metric between 0 and 1. 
+The license_ramp_up_metric.ts file is found in the src folder.  This file houses the function that will calculate the License Metric.  This function will clone the git repository locally and then look the the README.md file.  It will look at the total number of words in the README.md file to calculate a score for the Ramp-Up metric between 0 and 1.
+
+Correctness Metric Calulation:
+The lint-score.ts file is found in the src folder. The file contains the function taht calculates the correctness score. It will execute esLint at the core. It will then take the number of errors and warnings returned and calculate a score for the Correctness metric between 0 and 1.
 
 Packages:
 - fs
