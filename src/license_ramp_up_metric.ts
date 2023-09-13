@@ -23,7 +23,7 @@ async function cloneRepository(repoUrl: string, localPath: string): Promise<void
       url: repoUrl,
     });
 
-    console.log('Repository cloned successfully.');
+    //console.log('Repository cloned successfully.');
 
     // Access Git metadata (e.g., list branches)
     const branches = await git.listBranches({
@@ -31,7 +31,7 @@ async function cloneRepository(repoUrl: string, localPath: string): Promise<void
       dir: localPath,
     });
 
-    console.log('Branches:', branches);
+    //console.log('Branches:', branches);
   } catch (error) {
     console.error('Error cloning repository:', error);
   }
@@ -51,8 +51,8 @@ async function findGitHubRepoUrl(packageName: string): Promise<string> {
     // Parse the response JSON
     const packageMetadata = response.data;
 
-    console.log(packageMetadata.repository);
-    console.log(packageMetadata.repository.url);
+    //console.log(packageMetadata.repository);
+    //console.log(packageMetadata.repository.url);
     // Check if the "repository" field exists in the package.json
     if (packageMetadata.repository && packageMetadata.repository.url) {
       return 'https://' + packageMetadata.repository.url.match(/github\.com\/[^/]+\/[^/]+(?=\.git|$)/);
@@ -86,23 +86,23 @@ export async function license_ramp_up_metric(repoURL: string, num: number): Prom
     var license_met = 0;
     var ramp_up_met = 0;  
     //looks into tmpdir to make a temporay directory and then deleting at the end of the function 
-    console.log(repoDir);
+    //console.log(repoDir);
     fse.ensureDir(repoDir); //will make sure the directory exists or will create a new one
     
     //check the URL to see if it is a github url or a npmjs url 
     const url = repoURL.replace(/^(https?:\/\/)?(www\.)?/i, '');
     const parts = url.split('/'); 
     if(parts[0] === 'npmjs.com') {
-      console.log("This is a npmjs url");
+      //console.log("This is a npmjs url");
       //finds the github url of the npmjs module
-      console.log(`This is the npmjs package ${parts[2]}`);
+      //console.log(`This is the npmjs package ${parts[2]}`);
       repoURL = await findGitHubRepoUrl(parts[2]);
       if(repoURL == null) {
-        console.log(`This npmjs is not stored in a github repository.`);
+        //console.log(`This npmjs is not stored in a github repository.`);
         return [license_met, ramp_up_met]; 
       }
     }
-    console.log(repoURL);
+    //console.log(repoURL);
 
     //probably need to add in something to check if the url is from github just to make sure 
     
@@ -123,7 +123,7 @@ export async function license_ramp_up_metric(repoURL: string, num: number): Prom
     //deletes the temporary directory that was made
     try {
       fse.removeSync(repoDir); 
-      console.log('Temporary directory deleted.');
+      //console.log('Temporary directory deleted.');
     } catch (err) {
       console.error('Error deleting temporary directory:', err);
     }

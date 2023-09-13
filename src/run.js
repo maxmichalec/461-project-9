@@ -50,8 +50,6 @@ function processUrls(urlFile) {
                     filePath = urlFile;
                     fileContents = fs.readFileSync(filePath, 'utf-8');
                     urls = fileContents.split('\n').filter(function (url) { return url.trim() !== ''; });
-                    // Now you have an array of URLs, and you can work with them as needed
-                    console.log(urls);
                     l_r_metric_array = void 0;
                     number = 0;
                     _i = 0, urls_1 = urls;
@@ -76,7 +74,7 @@ function processUrls(urlFile) {
                     console.error('Error:', err_1);
                     return [3 /*break*/, 6];
                 case 6:
-                    console.log('Processing URLs...');
+                    //console.log('Processing URLs...');
                     process.exit(0);
                     return [2 /*return*/];
             }

@@ -17,7 +17,7 @@ async function processUrls(urlFile: string) {
     const urls = fileContents.split('\n').filter(url => url.trim() !== '');
   
     // Now you have an array of URLs, and you can work with them as needed
-    console.log(urls);
+    //console.log(urls);
     let l_r_metric_array: number[];   
     var number = 0; 
     for(const url of urls) {
@@ -31,7 +31,7 @@ async function processUrls(urlFile: string) {
     console.error('Error:', err);
   }
 
-  console.log('Processing URLs...');
+  //console.log('Processing URLs...');
   process.exit(0);
 }
 

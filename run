@@ -10,6 +10,7 @@ if [ "$1" == "install" ]; then
     npm install @types/node || echo "Error: @types/node not installed correctly"
     npm install axios || echo "Error: axios not installed correctly"
     npm install tmp || echo "Error: tmp not installed correctly"
+    npm install jest || echo "Error: jest not installed correctly"
     echo "Modules installed successfully."
 else 
     tsc src/run.ts

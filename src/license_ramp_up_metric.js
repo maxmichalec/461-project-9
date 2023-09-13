@@ -67,14 +67,12 @@ function cloneRepository(repoUrl, localPath) {
                 case 1:
                     // Clone the repository
                     _a.sent();
-                    console.log('Repository cloned successfully.');
                     return [4 /*yield*/, isomorphic_git_1.default.listBranches({
                             fs: fs,
                             dir: localPath,
                         })];
                 case 2:
                     branches = _a.sent();
-                    console.log('Branches:', branches);
                     return [3 /*break*/, 4];
                 case 3:
                     error_1 = _a.sent();
@@ -100,8 +98,8 @@ function findGitHubRepoUrl(packageName) {
                         return [2 /*return*/, 'none'];
                     }
                     packageMetadata = response.data;
-                    console.log(packageMetadata.repository);
-                    console.log(packageMetadata.repository.url);
+                    //console.log(packageMetadata.repository);
+                    //console.log(packageMetadata.repository.url);
                     // Check if the "repository" field exists in the package.json
                     if (packageMetadata.repository && packageMetadata.repository.url) {
                         return [2 /*return*/, 'https://' + packageMetadata.repository.url.match(/github\.com\/[^/]+\/[^/]+(?=\.git|$)/)];
@@ -142,28 +140,28 @@ function license_ramp_up_metric(repoURL, num) {
                     license_met = 0;
                     ramp_up_met = 0;
                     //looks into tmpdir to make a temporay directory and then deleting at the end of the function 
-                    console.log(repoDir);
+                    //console.log(repoDir);
                     fse.ensureDir(repoDir); //will make sure the directory exists or will create a new one
                     url = repoURL.replace(/^(https?:\/\/)?(www\.)?/i, '');
                     parts = url.split('/');
                     if (!(parts[0] === 'npmjs.com')) return [3 /*break*/, 2];
-                    console.log("This is a npmjs url");
-                    //finds the github url of the npmjs module
-                    console.log("This is the npmjs package ".concat(parts[2]));
                     return [4 /*yield*/, findGitHubRepoUrl(parts[2])];
                 case 1:
+                    //console.log("This is a npmjs url");
+                    //finds the github url of the npmjs module
+                    //console.log(`This is the npmjs package ${parts[2]}`);
                     repoURL = _a.sent();
-                    //repoURL = 'https://' + repoURL; 
                     if (repoURL == null) {
-                        console.log("This npmjs is not stored in a github repository.");
+                        //console.log(`This npmjs is not stored in a github repository.`);
                         return [2 /*return*/, [license_met, ramp_up_met]];
                     }
                     _a.label = 2;
-                case 2:
-                    console.log(repoURL);
-                    //probably need to add in something to check if the url is from github just to make sure 
-                    return [4 /*yield*/, cloneRepository(repoURL, repoDir)];
+                case 2: 
+                //console.log(repoURL);
+                //probably need to add in something to check if the url is from github just to make sure 
+                return [4 /*yield*/, cloneRepository(repoURL, repoDir)];
                 case 3:
+                    //console.log(repoURL);
                     //probably need to add in something to check if the url is from github just to make sure 
                     _a.sent(); //clones the repository
                     readmePath = "".concat(repoDir, "/Readme.md");
@@ -180,7 +178,7 @@ function license_ramp_up_metric(repoURL, num) {
                     //deletes the temporary directory that was made
                     try {
                         fse.removeSync(repoDir);
-                        console.log('Temporary directory deleted.');
+                        //console.log('Temporary directory deleted.');
                     }
                     catch (err) {
                         console.error('Error deleting temporary directory:', err);
