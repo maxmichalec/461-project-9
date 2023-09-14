@@ -13,6 +13,9 @@ if [ "$1" == "install" ]; then
     npm install jest || echo "Error: jest not installed correctly"
     npm install eslint || echo "Error: eslint not installed correctly"
     npm install @typescript-eslint/parser @typescript-eslint/eslint-plugin 
+    npm install node-fetch@2 || echo "Error: node-fetch@2 not installed correctly"
+    npm install @octokit/graphql || echo "Error: @octokit/graphql not installed correctly"
+    npm install dotenv || echo "Error: dotenv not installed correctly"
     npm install @types/jest ts-jest 
     npm install istanbul-lib-coverage istanbul-reports nyc
     echo "Modules installed successfully."

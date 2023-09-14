@@ -1,9 +1,12 @@
 #!/usr/bin/env node
 import * as fs from 'fs';
 import { license_ramp_up_metric } from './license_ramp_up_metric';
+import { bus_factor_maintainer_metric } from './bus_factor_maintainer_metric';
+import * as dotenv from 'dotenv';
 
 // Function to process URL_FILE and produce NDJSON output
 async function processUrls(urlFile: string) {
+  dotenv.config();
 
   // Add code to process URLs and generate NDJSON output here
   // You can use libraries like axios or node-fetch to fetch data from URLs.
@@ -19,12 +22,17 @@ async function processUrls(urlFile: string) {
     // Now you have an array of URLs, and you can work with them as needed
     //console.log(urls);
     let l_r_metric_array: number[]; //[0] = License Score, [1] = Ramp Up Score, [2] = Correctness Score
+    let bf_rm_metric_array: number[];
+    var number = 0;
     for(const url of urls) {
       console.log(`The URL that is currently running is ${url}`);
       l_r_metric_array = await license_ramp_up_metric(url); //returns license metric first and then ramp up metric
       console.log('License Metric:', l_r_metric_array[0]);
       console.log('Ramp Up Metric:', l_r_metric_array[1]);
       console.log('Correctness Metric:', l_r_metric_array[2]);   
+      bf_rm_metric_array = await bus_factor_maintainer_metric(url);
+      console.log('Bus Factor Metric:', bf_rm_metric_array[0]);
+      console.log('Responsive Maintainer Metric:', bf_rm_metric_array[1]);
     }
   } catch (err) {
     console.error('Error:', err);

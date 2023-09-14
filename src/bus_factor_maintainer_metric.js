@@ -37,83 +37,58 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var fs = require("fs");
+exports.bus_factor_maintainer_metric = void 0;
+var graphql_1 = require("@octokit/graphql");
 var license_ramp_up_metric_1 = require("./license_ramp_up_metric");
-var bus_factor_maintainer_metric_1 = require("./bus_factor_maintainer_metric");
-var dotenv = require("dotenv");
-// Function to process URL_FILE and produce NDJSON output
-function processUrls(urlFile) {
+var node_fetch_1 = require("node-fetch");
+function bus_factor_maintainer_metric(repoURL) {
     return __awaiter(this, void 0, void 0, function () {
-        var filePath, fileContents, urls, l_r_metric_array, bf_rm_metric_array, number, _i, urls_1, url, err_1;
+        var bus_factor, responsive_maintainer, url, sections, query, gqlRequest, error_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    dotenv.config();
-                    _a.label = 1;
+                    bus_factor = 0;
+                    responsive_maintainer = 0;
+                    url = repoURL.replace(/^(https?:\/\/)?(www\.)?/i, '');
+                    sections = url.split('/');
+                    if (!(sections[0] === 'npmjs.com')) return [3 /*break*/, 2];
+                    console.log("npmjs package: ".concat(sections[2]));
+                    return [4 /*yield*/, (0, license_ramp_up_metric_1.findGitHubRepoUrl)(sections[2])];
                 case 1:
-                    _a.trys.push([1, 7, , 8]);
-                    filePath = urlFile;
-                    fileContents = fs.readFileSync(filePath, 'utf-8');
-                    urls = fileContents.split('\n').filter(function (url) { return url.trim() !== ''; });
-                    l_r_metric_array = void 0;
-                    bf_rm_metric_array = void 0;
-                    number = 0;
-                    _i = 0, urls_1 = urls;
+                    // Find the GitHub URL for the package
+                    repoURL = _a.sent();
+                    if (repoURL === null) {
+                        console.log("This npmjs package is not stored in a GitHub repository.");
+                        return [2 /*return*/, [bus_factor, responsive_maintainer]];
+                    }
                     _a.label = 2;
                 case 2:
-                    if (!(_i < urls_1.length)) return [3 /*break*/, 6];
-                    url = urls_1[_i];
-                    console.log("The URL that is currently running is ".concat(url));
-                    return [4 /*yield*/, (0, license_ramp_up_metric_1.license_ramp_up_metric)(url, number)];
+                    console.log("GitHub repository: ".concat(repoURL));
+                    query = "\n\t\t{\n\t\t\trepository(owner: \"maxmichalec\", name: \"461-project-9\") {\n\t\t\t\tissues(last: 1, states: OPEN) {\n\t\t\t\t\tedges {\n\t\t\t\t\t\tnode {\n\t\t\t\t\t\t\ttitle\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t";
+                    _a.label = 3;
                 case 3:
-                    l_r_metric_array = _a.sent(); //returns license metric first and then ramp up metric
-                    number = number + 1;
-                    console.log('License Metric:', l_r_metric_array[0]);
-                    console.log('Ramp Up Metric:', l_r_metric_array[1]);
-                    console.log('Correctness Metric:', l_r_metric_array[2]);
-                    return [4 /*yield*/, (0, bus_factor_maintainer_metric_1.bus_factor_maintainer_metric)(url)];
+                    _a.trys.push([3, 5, , 6]);
+                    return [4 /*yield*/, (0, graphql_1.graphql)(query, {
+                            headers: {
+                                authorization: "token ".concat(process.env.GITHUB_TOKEN),
+                            },
+                            request: {
+                                fetch: node_fetch_1.default,
+                            },
+                        })];
                 case 4:
-                    bf_rm_metric_array = _a.sent();
-                    console.log('Bus Factor Metric:', bf_rm_metric_array[0]);
-                    console.log('Responsive Maintainer Metric:', bf_rm_metric_array[1]);
-                    _a.label = 5;
+                    gqlRequest = _a.sent();
+                    gqlRequest.repository.issues.edges.forEach(function (issue) {
+                        console.log(issue.node.title);
+                    });
+                    return [3 /*break*/, 6];
                 case 5:
-                    _i++;
-                    return [3 /*break*/, 2];
-                case 6: return [3 /*break*/, 8];
-                case 7:
-                    err_1 = _a.sent();
-                    console.error('Error:', err_1);
-                    return [3 /*break*/, 8];
-                case 8:
-                    //console.log('Processing URLs...');
-                    process.exit(0);
-                    return [2 /*return*/];
+                    error_1 = _a.sent();
+                    console.error("Error fetching GitHub repository: ".concat(error_1));
+                    return [2 /*return*/, [0, 0]];
+                case 6: return [2 /*return*/, [bus_factor, responsive_maintainer]];
             }
         });
     });
 }
-// Function to run the test suite
-function runTests() {
-    // Add code to run your test suite here
-    // You can use testing frameworks like Jest, Mocha, etc.
-    // Replace the above comment with your actual test suite command.
-    console.log('Running tests...');
-    process.exit(0);
-}
-// Main CLI
-var args = process.argv.slice(2);
-if (args[0] == 'test') {
-    runTests();
-}
-else {
-    fs.access(args[0], fs.constants.F_OK, function (err) {
-        if (err) {
-            console.error("File '".concat(args[0], " does not exist."));
-        }
-        else {
-            console.log("File '".concat(args[0], " exists."));
-            processUrls(args[0]);
-        }
-    });
-}
+exports.bus_factor_maintainer_metric = bus_factor_maintainer_metric;
