@@ -18,14 +18,15 @@ async function processUrls(urlFile: string) {
   
     // Now you have an array of URLs, and you can work with them as needed
     //console.log(urls);
-    let l_r_metric_array: number[];   
+    let l_r_metric_array: number[]; //[0] = License Score, [1] = Ramp Up Score, [2] = Correctness Score
     var number = 0; 
     for(const url of urls) {
       console.log(`The URL that is currently running is ${url}`);
       l_r_metric_array = await license_ramp_up_metric(url, number); //returns license metric first and then ramp up metric
       number = number + 1; 
       console.log('License Metric:', l_r_metric_array[0]);
-      console.log('Ramp Up Metric:', l_r_metric_array[1]);  
+      console.log('Ramp Up Metric:', l_r_metric_array[1]);
+      console.log('Correctness Metric:', l_r_metric_array[2]);   
     }
   } catch (err) {
     console.error('Error:', err);

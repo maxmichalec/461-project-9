@@ -44,6 +44,8 @@ var isomorphic_git_1 = require("isomorphic-git");
 var node_1 = require("isomorphic-git/http/node");
 var axios_1 = require("axios");
 var tmp = require("tmp");
+var eslint_1 = require("eslint");
+var path_1 = require("path");
 var compatibleLicenses = [
     'mit license',
     'bsd 2-clause "simplified" license',
@@ -129,9 +131,49 @@ function calculate_ramp_up_metric(wordCount, maxWordCount) {
     // Calculate the score based on the word count relative to the max word count
     return Math.min(wordCount / maxWordCount, maxScore);
 }
+function findAllFiles(directory) {
+    var allFiles = [];
+    var codeExtensions = ['.ts'];
+    var files = fs.readdirSync(directory);
+    for (var _i = 0, files_1 = files; _i < files_1.length; _i++) {
+        var file = files_1[_i];
+        var filePath = (0, path_1.join)(directory, file);
+        var stats = fs.statSync(filePath);
+        if (stats.isDirectory()) {
+            findAllFiles(filePath);
+        }
+        else if (codeExtensions.includes((0, path_1.extname)(filePath))) {
+            allFiles.push(filePath);
+        }
+    }
+    return allFiles;
+}
+function calculate_correctness_metric(filepath) {
+    try {
+        // Initailize ESLint
+        var eslint = new eslint_1.ESLint();
+        //Get a list of Typescript files with the cloned directory
+        var allFiles = findAllFiles(filepath);
+        //Lint in Typescript files
+        var results = eslint.lintFiles(allFiles);
+        // Calculate the total number of issues (errors + warnings)
+        var totalIssues = 0;
+        for (var _i = 0, results_1 = results; _i < results_1.length; _i++) {
+            var result = results_1[_i];
+            totalIssues += result.errorCount + result.warningCount;
+        }
+        // Calculate the lint score as a value between 0 and 1
+        var lintScore = 1 - Math.min(1, totalIssues / 1.0);
+        return lintScore;
+    }
+    catch (error) {
+        //console.error('Error running ESLint:', error);
+        return 0; // Return 0 in case of an error
+    }
+}
 function license_ramp_up_metric(repoURL, num) {
     return __awaiter(this, void 0, void 0, function () {
-        var tempDir, repoDir, license_met, ramp_up_met, url, parts, readmePath, readmeContent, _i, compatibleLicenses_1, compatibleLicense, wordCount, maxWordCount;
+        var tempDir, repoDir, license_met, ramp_up_met, correctness_met, url, parts, readmePath, readmeContent, _i, compatibleLicenses_1, compatibleLicense, wordCount, maxWordCount;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -139,6 +181,7 @@ function license_ramp_up_metric(repoURL, num) {
                     repoDir = tempDir.name;
                     license_met = 0;
                     ramp_up_met = 0;
+                    correctness_met = 0;
                     //looks into tmpdir to make a temporay directory and then deleting at the end of the function 
                     //console.log(repoDir);
                     fse.ensureDir(repoDir); //will make sure the directory exists or will create a new one
@@ -153,7 +196,7 @@ function license_ramp_up_metric(repoURL, num) {
                     repoURL = _a.sent();
                     if (repoURL == null) {
                         //console.log(`This npmjs is not stored in a github repository.`);
-                        return [2 /*return*/, [license_met, ramp_up_met]];
+                        return [2 /*return*/, [license_met, ramp_up_met, correctness_met]];
                     }
                     _a.label = 2;
                 case 2: 
@@ -175,14 +218,6 @@ function license_ramp_up_metric(repoURL, num) {
                             readmeContent = fs.readFileSync(readmePath, 'utf-8').toLowerCase();
                         }
                     }
-                    //deletes the temporary directory that was made
-                    try {
-                        fse.removeSync(repoDir);
-                        //console.log('Temporary directory deleted.');
-                    }
-                    catch (err) {
-                        console.error('Error deleting temporary directory:', err);
-                    }
                     //CALCULATES THE LICENSE SCORE 
                     for (_i = 0, compatibleLicenses_1 = compatibleLicenses; _i < compatibleLicenses_1.length; _i++) {
                         compatibleLicense = compatibleLicenses_1[_i];
@@ -193,7 +228,17 @@ function license_ramp_up_metric(repoURL, num) {
                     wordCount = countWords(readmeContent);
                     maxWordCount = 2000;
                     ramp_up_met = calculate_ramp_up_metric(wordCount, maxWordCount); //calculates the actual score
-                    return [2 /*return*/, ([license_met, ramp_up_met])];
+                    //CALUCLATES THE CORRECTNESS SCORE
+                    correctness_met = calculate_correctness_metric(repoDir);
+                    //deletes the temporary directory that was made
+                    try {
+                        fse.removeSync(repoDir);
+                        //console.log('Temporary directory deleted.');
+                    }
+                    catch (err) {
+                        console.error('Error deleting temporary directory:', err);
+                    }
+                    return [2 /*return*/, ([license_met, ramp_up_met, correctness_met])];
             }
         });
     });

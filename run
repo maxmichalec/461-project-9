@@ -11,6 +11,8 @@ if [ "$1" == "install" ]; then
     npm install axios || echo "Error: axios not installed correctly"
     npm install tmp || echo "Error: tmp not installed correctly"
     npm install jest || echo "Error: jest not installed correctly"
+    npm install eslint || echo "Error: eslint not installed correctly"
+    npm install @typescript-eslint/parser @typescript-eslint/eslint-plugin 
     echo "Modules installed successfully."
 else 
     tsc src/run.ts

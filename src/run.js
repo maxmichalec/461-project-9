@@ -64,6 +64,7 @@ function processUrls(urlFile) {
                     number = number + 1;
                     console.log('License Metric:', l_r_metric_array[0]);
                     console.log('Ramp Up Metric:', l_r_metric_array[1]);
+                    console.log('Correctness Metric:', l_r_metric_array[2]);
                     _a.label = 3;
                 case 3:
                     _i++;

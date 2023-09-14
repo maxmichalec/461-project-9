@@ -5,6 +5,8 @@ import git from 'isomorphic-git';
 import http from 'isomorphic-git/http/node';
 import axios from 'axios';
 import * as tmp from 'tmp';
+import { Linter, ESLint} from 'eslint'; 
+import { join, extname } from 'path'; 
 
 const compatibleLicenses = [
     'mit license', 
@@ -80,11 +82,56 @@ function calculate_ramp_up_metric(wordCount: number, maxWordCount: number): numb
   return Math.min(wordCount / maxWordCount, maxScore); 
 }
 
+function findAllFiles(directory: string): string[] {
+  const allFiles: string[] = []; 
+  const codeExtensions = ['.ts']; 
+  const files = fs.readdirSync(directory);
+  for (const file of files) {
+    const filePath = join(directory, file);
+    const stats = fs.statSync(filePath);
+    if (stats.isDirectory()) {
+      findAllFiles(filePath);
+    } else if (codeExtensions.includes(extname(filePath))) {
+      allFiles.push(filePath);
+    }
+  }
+  return allFiles; 
+}
+
+function calculate_correctness_metric(filepath: string): number {
+  try {
+    // Initailize ESLint
+    const eslint = new ESLint(); 
+
+    //Get a list of Typescript files with the cloned directory
+    const allFiles = findAllFiles(filepath); 
+
+    //Lint in Typescript files
+    const results = eslint.lintFiles(allFiles); 
+
+    // Calculate the total number of issues (errors + warnings)
+    let totalIssues = 0; 
+    for (const result of results) 
+    {
+      totalIssues += result.errorCount + result.warningCount; 
+    }
+
+    // Calculate the lint score as a value between 0 and 1
+    const lintScore = 1 - Math.min(1, totalIssues / 1.0);
+
+    return lintScore;
+  } catch (error) {
+    //console.error('Error running ESLint:', error);
+    return 0; // Return 0 in case of an error
+  }
+}
+
 export async function license_ramp_up_metric(repoURL: string, num: number): Promise<number[]> {
     const tempDir = tmp.dirSync(); //makes a temporary directory
     const repoDir = tempDir.name; 
     var license_met = 0;
     var ramp_up_met = 0;  
+    var correctness_met = 0; 
     //looks into tmpdir to make a temporay directory and then deleting at the end of the function 
     //console.log(repoDir);
     fse.ensureDir(repoDir); //will make sure the directory exists or will create a new one
@@ -99,7 +146,7 @@ export async function license_ramp_up_metric(repoURL: string, num: number): Prom
       repoURL = await findGitHubRepoUrl(parts[2]);
       if(repoURL == null) {
         //console.log(`This npmjs is not stored in a github repository.`);
-        return [license_met, ramp_up_met]; 
+        return [license_met, ramp_up_met, correctness_met]; 
       }
     }
     //console.log(repoURL);
@@ -119,14 +166,6 @@ export async function license_ramp_up_metric(repoURL: string, num: number): Prom
         readmeContent = fs.readFileSync(readmePath, 'utf-8').toLowerCase();
       } 
     }
-    
-    //deletes the temporary directory that was made
-    try {
-      fse.removeSync(repoDir); 
-      //console.log('Temporary directory deleted.');
-    } catch (err) {
-      console.error('Error deleting temporary directory:', err);
-    }
 
     //CALCULATES THE LICENSE SCORE 
     for(const compatibleLicense of compatibleLicenses) {
@@ -140,5 +179,19 @@ export async function license_ramp_up_metric(repoURL: string, num: number): Prom
     const maxWordCount = 2000; //NEED TO ADJUST THIS NUMBER BASED ON WHAT WE GET FROM DIFFERENT TEST RESULTS
     ramp_up_met = calculate_ramp_up_metric(wordCount, maxWordCount); //calculates the actual score
 
-    return([license_met, ramp_up_met]); 
+
+    //CALUCLATES THE CORRECTNESS SCORE
+    correctness_met = calculate_correctness_metric(repoDir); 
+
+
+    //deletes the temporary directory that was made
+    try {
+      fse.removeSync(repoDir); 
+      //console.log('Temporary directory deleted.');
+    } catch (err) {
+      console.error('Error deleting temporary directory:', err);
+    }
+
+
+    return([license_met, ramp_up_met, correctness_met]); 
 }
