@@ -113,7 +113,7 @@ function findGitHubRepoUrl(packageName) {
                     return [3 /*break*/, 3];
                 case 2:
                     error_2 = _a.sent();
-                    console.error("Error fetching package.json for ".concat(packageName, ": ").concat(error_2.message));
+                    console.error("Error fetching package.json for ".concat(packageName, ":"));
                     return [2 /*return*/, 'none'];
                 case 3: return [2 /*return*/];
             }
@@ -149,27 +149,40 @@ function findAllFiles(directory) {
     return allFiles;
 }
 function calculate_correctness_metric(filepath) {
-    try {
-        // Initailize ESLint
-        var eslint = new eslint_1.ESLint();
-        //Get a list of Typescript files with the cloned directory
-        var allFiles = findAllFiles(filepath);
-        //Lint in Typescript files
-        var results = eslint.lintFiles(allFiles);
-        // Calculate the total number of issues (errors + warnings)
-        var totalIssues = 0;
-        for (var _i = 0, results_1 = results; _i < results_1.length; _i++) {
-            var result = results_1[_i];
-            totalIssues += result.errorCount + result.warningCount;
-        }
-        // Calculate the lint score as a value between 0 and 1
-        var lintScore = 1 - Math.min(1, totalIssues / 1.0);
-        return lintScore;
-    }
-    catch (error) {
-        //console.error('Error running ESLint:', error);
-        return 0; // Return 0 in case of an error
-    }
+    return __awaiter(this, void 0, void 0, function () {
+        var eslint, allFiles, results, totalIssues, _i, _a, result, lintScore, error_3;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
+                case 0:
+                    _b.trys.push([0, 5, , 6]);
+                    eslint = new eslint_1.ESLint();
+                    allFiles = findAllFiles(filepath);
+                    results = eslint.lintFiles(allFiles);
+                    totalIssues = 0;
+                    _i = 0;
+                    return [4 /*yield*/, results];
+                case 1:
+                    _a = _b.sent();
+                    _b.label = 2;
+                case 2:
+                    if (!(_i < _a.length)) return [3 /*break*/, 4];
+                    result = _a[_i];
+                    totalIssues += result.errorCount + result.warningCount;
+                    _b.label = 3;
+                case 3:
+                    _i++;
+                    return [3 /*break*/, 2];
+                case 4:
+                    lintScore = 1 - Math.min(1, totalIssues / 100.0);
+                    return [2 /*return*/, lintScore];
+                case 5:
+                    error_3 = _b.sent();
+                    //console.error('Error running ESLint:', error);
+                    return [2 /*return*/, 0]; // Return 0 in case of an error
+                case 6: return [2 /*return*/];
+            }
+        });
+    });
 }
 function license_ramp_up_metric(repoURL, num) {
     return __awaiter(this, void 0, void 0, function () {
@@ -228,8 +241,10 @@ function license_ramp_up_metric(repoURL, num) {
                     wordCount = countWords(readmeContent);
                     maxWordCount = 2000;
                     ramp_up_met = calculate_ramp_up_metric(wordCount, maxWordCount); //calculates the actual score
+                    return [4 /*yield*/, calculate_correctness_metric(repoDir)];
+                case 4:
                     //CALUCLATES THE CORRECTNESS SCORE
-                    correctness_met = calculate_correctness_metric(repoDir);
+                    correctness_met = _a.sent();
                     //deletes the temporary directory that was made
                     try {
                         fse.removeSync(repoDir);

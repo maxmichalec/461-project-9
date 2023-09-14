@@ -11,8 +11,7 @@ import { join, extname } from 'path';
 const compatibleLicenses = [
     'mit license', 
     'bsd 2-clause "simplified" license', 
-    /(mit.*license|license.*mit)/i, 
-    'mit'
+    /(mit.*license|license.*mit)/i,
 ];
 
 async function cloneRepository(repoUrl: string, localPath: string): Promise<void> { 
@@ -63,7 +62,7 @@ async function findGitHubRepoUrl(packageName: string): Promise<string> {
       return 'none';
     }
   } catch (error) {
-    console.error(`Error fetching package.json for ${packageName}: ${error.message}`);
+    console.error(`Error fetching package.json for ${packageName}:`);
     return 'none';
   }
 } 
@@ -98,7 +97,7 @@ function findAllFiles(directory: string): string[] {
   return allFiles; 
 }
 
-function calculate_correctness_metric(filepath: string): number {
+async function calculate_correctness_metric(filepath: string): Promise<number> {
   try {
     // Initailize ESLint
     const eslint = new ESLint(); 
@@ -111,13 +110,13 @@ function calculate_correctness_metric(filepath: string): number {
 
     // Calculate the total number of issues (errors + warnings)
     let totalIssues = 0; 
-    for (const result of results) 
+    for (const result of await results) 
     {
       totalIssues += result.errorCount + result.warningCount; 
     }
 
     // Calculate the lint score as a value between 0 and 1
-    const lintScore = 1 - Math.min(1, totalIssues / 1.0);
+    const lintScore = 1 - Math.min(1, totalIssues / 100.0);
 
     return lintScore;
   } catch (error) {
@@ -126,7 +125,7 @@ function calculate_correctness_metric(filepath: string): number {
   }
 }
 
-export async function license_ramp_up_metric(repoURL: string, num: number): Promise<number[]> {
+export async function license_ramp_up_metric(repoURL: string): Promise<number[]> {
     const tempDir = tmp.dirSync(); //makes a temporary directory
     const repoDir = tempDir.name; 
     var license_met = 0;
@@ -181,7 +180,7 @@ export async function license_ramp_up_metric(repoURL: string, num: number): Prom
 
 
     //CALUCLATES THE CORRECTNESS SCORE
-    correctness_met = calculate_correctness_metric(repoDir); 
+    correctness_met =  await calculate_correctness_metric(repoDir); 
 
 
     //deletes the temporary directory that was made
