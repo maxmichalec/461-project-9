@@ -40,7 +40,7 @@ async function cloneRepository(repoUrl: string, localPath: string): Promise<void
 }
 
 
-async function findGitHubRepoUrl(packageName: string): Promise<string> {
+export async function findGitHubRepoUrl(packageName: string): Promise<string> {
   try {
     // Fetch package metadata from the npm registry
     const response = await axios.get(`https://registry.npmjs.org/${packageName}`);

@@ -37,7 +37,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.license_ramp_up_metric = void 0;
+exports.license_ramp_up_metric = exports.findGitHubRepoUrl = void 0;
 var fs = require("fs");
 var fse = require("fs-extra");
 var isomorphic_git_1 = require("isomorphic-git");
@@ -120,6 +120,7 @@ function findGitHubRepoUrl(packageName) {
         });
     });
 }
+exports.findGitHubRepoUrl = findGitHubRepoUrl;
 // Function to count words in a string
 function countWords(text) {
     var words = text.split(/\s+/);
