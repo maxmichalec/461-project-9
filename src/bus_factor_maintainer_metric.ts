@@ -16,7 +16,7 @@ export async function bus_factor_maintainer_metric(repoURL: string) : Promise<nu
 		console.log(`npmjs package: ${sections[2]}`);
 		// Find the GitHub URL for the package
 		repoURL = await findGitHubRepoUrl(sections[2]);
-		if (repoURL === null) {
+		if (repoURL === 'none') {
 			console.log(`This npmjs package is not stored in a GitHub repository.`);
 			return [bus_factor, responsive_maintainer];
 		}

@@ -57,7 +57,7 @@ function bus_factor_maintainer_metric(repoURL) {
                 case 1:
                     // Find the GitHub URL for the package
                     repoURL = _a.sent();
-                    if (repoURL === null) {
+                    if (repoURL === 'none') {
                         console.log("This npmjs package is not stored in a GitHub repository.");
                         return [2 /*return*/, [bus_factor, responsive_maintainer]];
                     }

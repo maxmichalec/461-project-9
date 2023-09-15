@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/25</span>
+                <span class='fraction'>0/32</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/24</span>
+                <span class='fraction'>0/31</span>
             </div>
         
             
@@ -127,12 +127,23 @@
 <a name='L62'></a><a href='#L62'>62</a>
 <a name='L63'></a><a href='#L63'>63</a>
 <a name='L64'></a><a href='#L64'>64</a>
-<a name='L65'></a><a href='#L65'>65</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L65'></a><a href='#L65'>65</a>
+<a name='L66'></a><a href='#L66'>66</a>
+<a name='L67'></a><a href='#L67'>67</a>
+<a name='L68'></a><a href='#L68'>68</a>
+<a name='L69'></a><a href='#L69'>69</a>
+<a name='L70'></a><a href='#L70'>70</a>
+<a name='L71'></a><a href='#L71'>71</a>
+<a name='L72'></a><a href='#L72'>72</a>
+<a name='L73'></a><a href='#L73'>73</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -148,6 +159,11 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -194,9 +210,12 @@
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">#!/usr/bin/env node
 <span class="cstat-no" title="statement not covered" >import * as fs from 'fs';</span>
 <span class="cstat-no" title="statement not covered" >import { license_ramp_up_metric } from './license_ramp_up_metric';</span>
+<span class="cstat-no" title="statement not covered" >import { bus_factor_maintainer_metric } from './bus_factor_maintainer_metric';</span>
+<span class="cstat-no" title="statement not covered" >import * as dotenv from 'dotenv';</span>
 &nbsp;
 // Function to process URL_FILE and produce NDJSON output
 async function <span class="fstat-no" title="function not covered" >processUrls(</span>urlFile: string) {
+<span class="cstat-no" title="statement not covered" >  dotenv.config();</span>
 &nbsp;
   // Add code to process URLs and generate NDJSON output here
   // You can use libraries like axios or node-fetch to fetch data from URLs.
@@ -212,12 +231,17 @@ async function <span class="fstat-no" title="function not covered" >processUrls(
     // Now you have an array of URLs, and you can work with them as needed
     //console.log(urls);
     let l_r_metric_array: number[]; //[0] = License Score, [1] = Ramp Up Score, [2] = Correctness Score
+    let bf_rm_metric_array: number[];
+    var number = <span class="cstat-no" title="statement not covered" >0;</span>
 <span class="cstat-no" title="statement not covered" >    for(const url of urls) {</span>
 <span class="cstat-no" title="statement not covered" >      console.log(`The URL that is currently running is ${url}`);</span>
 <span class="cstat-no" title="statement not covered" >      l_r_metric_array = await license_ramp_up_metric(url); </span>//returns license metric first and then ramp up metric
 <span class="cstat-no" title="statement not covered" >      console.log('License Metric:', l_r_metric_array[0]);</span>
 <span class="cstat-no" title="statement not covered" >      console.log('Ramp Up Metric:', l_r_metric_array[1]);</span>
 <span class="cstat-no" title="statement not covered" >      console.log('Correctness Metric:', l_r_metric_array[2]);   </span>
+<span class="cstat-no" title="statement not covered" >      bf_rm_metric_array = await bus_factor_maintainer_metric(url);</span>
+<span class="cstat-no" title="statement not covered" >      console.log('Bus Factor Metric:', bf_rm_metric_array[0]);</span>
+<span class="cstat-no" title="statement not covered" >      console.log('Responsive Maintainer Metric:', bf_rm_metric_array[1]);</span>
     }
   } catch (err) {
 <span class="cstat-no" title="statement not covered" >    console.error('Error:', err);</span>
@@ -262,7 +286,7 @@ else
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2023-09-14T22:41:05.003Z
+                at 2023-09-15T01:33:11.483Z
             </div>
         <script src="prettify.js"></script>
         <script>

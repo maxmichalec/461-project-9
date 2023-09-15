@@ -26,13 +26,6 @@ async function cloneRepository(repoUrl: string, localPath: string): Promise<void
 
     //console.log('Repository cloned successfully.');
 
-    // Access Git metadata (e.g., list branches)
-    const branches = await git.listBranches({
-      fs,
-      dir: localPath,
-    });
-
-    //console.log('Branches:', branches);
   } catch (error) {
     console.error('Error cloning repository:', error);
   }
@@ -68,36 +61,43 @@ export async function findGitHubRepoUrl(packageName: string): Promise<string> {
 } 
 
 // Function to count words in a string
-function countWords(text: string): number {
+export function countWords(text: string): number {
   const words = text.split(/\s+/);
-  return words.length;
+  const nonEmptyWords = words.filter(word => word !== ''); 
+  return nonEmptyWords.length;
 }
 
 // Function to calculate the score based on word count
-function calculate_ramp_up_metric(wordCount: number, maxWordCount: number): number {
+export function calculate_ramp_up_metric(wordCount: number, maxWordCount: number): number {
   const maxScore = 1.0; // Maximum score
     
   // Calculate the score based on the word count relative to the max word count
   return Math.min(wordCount / maxWordCount, maxScore); 
 }
 
-function findAllFiles(directory: string): string[] {
+export function findAllFiles(directory: string): string[] {
   const allFiles: string[] = []; 
-  const codeExtensions = ['.ts']; 
-  const files = fs.readdirSync(directory);
-  for (const file of files) {
-    const filePath = join(directory, file);
-    const stats = fs.statSync(filePath);
-    if (stats.isDirectory()) {
-      findAllFiles(filePath);
-    } else if (codeExtensions.includes(extname(filePath))) {
-      allFiles.push(filePath);
+  const codeExtensions = ['.ts']; //NEED TP MAKE THIS WORK FOR ALL DIFFERENT TYPES OF FILES BUT RIGHT NOW IT ONLY GOES THROUGH .TS FILES
+  
+  function traverseDirectory(currentDir: string) {
+    const files = fs.readdirSync(currentDir);
+    for (const file of files) {
+      const filePath = join(currentDir, file);
+      const stats = fs.statSync(filePath);
+      if (stats.isDirectory()) {
+        // Recursively traverse subdirectories
+        traverseDirectory(filePath);
+      } else if (codeExtensions.includes(extname(filePath))) {
+        allFiles.push(filePath);
+      }
     }
   }
+
+  traverseDirectory(directory);
   return allFiles; 
 }
 
-async function calculate_correctness_metric(filepath: string): Promise<number> {
+export async function calculate_correctness_metric(filepath: string): Promise<number> {
   try {
     // Initailize ESLint
     const eslint = new ESLint(); 
@@ -116,7 +116,7 @@ async function calculate_correctness_metric(filepath: string): Promise<number> {
     }
 
     // Calculate the lint score as a value between 0 and 1
-    const lintScore = 1 - Math.min(1, totalIssues / 100.0);
+    const lintScore = 1 - Math.min(1, totalIssues / 1000.0);
 
     return lintScore;
   } catch (error) {

@@ -37,7 +37,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.license_ramp_up_metric = exports.findGitHubRepoUrl = void 0;
+exports.license_ramp_up_metric = exports.calculate_correctness_metric = exports.findAllFiles = exports.calculate_ramp_up_metric = exports.countWords = exports.findGitHubRepoUrl = void 0;
 var fs = require("fs");
 var fse = require("fs-extra");
 var isomorphic_git_1 = require("isomorphic-git");
@@ -53,11 +53,11 @@ var compatibleLicenses = [
 ];
 function cloneRepository(repoUrl, localPath) {
     return __awaiter(this, void 0, void 0, function () {
-        var branches, error_1;
+        var error_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 3, , 4]);
+                    _a.trys.push([0, 2, , 3]);
                     // Clone the repository
                     return [4 /*yield*/, isomorphic_git_1.default.clone({
                             fs: fs,
@@ -68,18 +68,12 @@ function cloneRepository(repoUrl, localPath) {
                 case 1:
                     // Clone the repository
                     _a.sent();
-                    return [4 /*yield*/, isomorphic_git_1.default.listBranches({
-                            fs: fs,
-                            dir: localPath,
-                        })];
+                    return [3 /*break*/, 3];
                 case 2:
-                    branches = _a.sent();
-                    return [3 /*break*/, 4];
-                case 3:
                     error_1 = _a.sent();
                     console.error('Error cloning repository:', error_1);
-                    return [3 /*break*/, 4];
-                case 4: return [2 /*return*/];
+                    return [3 /*break*/, 3];
+                case 3: return [2 /*return*/];
             }
         });
     });
@@ -123,31 +117,39 @@ exports.findGitHubRepoUrl = findGitHubRepoUrl;
 // Function to count words in a string
 function countWords(text) {
     var words = text.split(/\s+/);
-    return words.length;
+    var nonEmptyWords = words.filter(function (word) { return word !== ''; });
+    return nonEmptyWords.length;
 }
+exports.countWords = countWords;
 // Function to calculate the score based on word count
 function calculate_ramp_up_metric(wordCount, maxWordCount) {
     var maxScore = 1.0; // Maximum score
     // Calculate the score based on the word count relative to the max word count
     return Math.min(wordCount / maxWordCount, maxScore);
 }
+exports.calculate_ramp_up_metric = calculate_ramp_up_metric;
 function findAllFiles(directory) {
     var allFiles = [];
-    var codeExtensions = ['.ts'];
-    var files = fs.readdirSync(directory);
-    for (var _i = 0, files_1 = files; _i < files_1.length; _i++) {
-        var file = files_1[_i];
-        var filePath = (0, path_1.join)(directory, file);
-        var stats = fs.statSync(filePath);
-        if (stats.isDirectory()) {
-            findAllFiles(filePath);
-        }
-        else if (codeExtensions.includes((0, path_1.extname)(filePath))) {
-            allFiles.push(filePath);
+    var codeExtensions = ['.ts']; //NEED TP MAKE THIS WORK FOR ALL DIFFERENT TYPES OF FILES BUT RIGHT NOW IT ONLY GOES THROUGH .TS FILES
+    function traverseDirectory(currentDir) {
+        var files = fs.readdirSync(currentDir);
+        for (var _i = 0, files_1 = files; _i < files_1.length; _i++) {
+            var file = files_1[_i];
+            var filePath = (0, path_1.join)(currentDir, file);
+            var stats = fs.statSync(filePath);
+            if (stats.isDirectory()) {
+                // Recursively traverse subdirectories
+                traverseDirectory(filePath);
+            }
+            else if (codeExtensions.includes((0, path_1.extname)(filePath))) {
+                allFiles.push(filePath);
+            }
         }
     }
+    traverseDirectory(directory);
     return allFiles;
 }
+exports.findAllFiles = findAllFiles;
 function calculate_correctness_metric(filepath) {
     return __awaiter(this, void 0, void 0, function () {
         var eslint, allFiles, results, totalIssues, _i, _a, result, lintScore, error_3;
@@ -173,7 +175,7 @@ function calculate_correctness_metric(filepath) {
                     _i++;
                     return [3 /*break*/, 2];
                 case 4:
-                    lintScore = 1 - Math.min(1, totalIssues / 100.0);
+                    lintScore = 1 - Math.min(1, totalIssues / 1000.0);
                     return [2 /*return*/, lintScore];
                 case 5:
                     error_3 = _b.sent();
@@ -184,6 +186,7 @@ function calculate_correctness_metric(filepath) {
         });
     });
 }
+exports.calculate_correctness_metric = calculate_correctness_metric;
 function license_ramp_up_metric(repoURL) {
     return __awaiter(this, void 0, void 0, function () {
         var tempDir, repoDir, license_met, ramp_up_met, correctness_met, url, parts, readmePath, readmeContent, _i, compatibleLicenses_1, compatibleLicense, wordCount, maxWordCount;
