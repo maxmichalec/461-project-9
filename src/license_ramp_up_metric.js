@@ -50,7 +50,6 @@ var compatibleLicenses = [
     'mit license',
     'bsd 2-clause "simplified" license',
     /(mit.*license|license.*mit)/i,
-    'mit'
 ];
 function cloneRepository(repoUrl, localPath) {
     return __awaiter(this, void 0, void 0, function () {
@@ -185,7 +184,7 @@ function calculate_correctness_metric(filepath) {
         });
     });
 }
-function license_ramp_up_metric(repoURL, num) {
+function license_ramp_up_metric(repoURL) {
     return __awaiter(this, void 0, void 0, function () {
         var tempDir, repoDir, license_met, ramp_up_met, correctness_met, url, parts, readmePath, readmeContent, _i, compatibleLicenses_1, compatibleLicense, wordCount, maxWordCount;
         return __generator(this, function (_a) {

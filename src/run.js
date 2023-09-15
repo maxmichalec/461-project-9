@@ -64,10 +64,9 @@ function processUrls(urlFile) {
                     if (!(_i < urls_1.length)) return [3 /*break*/, 6];
                     url = urls_1[_i];
                     console.log("The URL that is currently running is ".concat(url));
-                    return [4 /*yield*/, (0, license_ramp_up_metric_1.license_ramp_up_metric)(url, number)];
+                    return [4 /*yield*/, (0, license_ramp_up_metric_1.license_ramp_up_metric)(url)];
                 case 3:
                     l_r_metric_array = _a.sent(); //returns license metric first and then ramp up metric
-                    number = number + 1;
                     console.log('License Metric:', l_r_metric_array[0]);
                     console.log('Ramp Up Metric:', l_r_metric_array[1]);
                     console.log('Correctness Metric:', l_r_metric_array[2]);
