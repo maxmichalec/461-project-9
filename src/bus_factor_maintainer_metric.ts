@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import logger from './run'
 import git from 'isomorphic-git';
 import { graphql, GraphQlQueryResponseData } from '@octokit/graphql';
 import { findGitHubRepoUrl } from './license_ramp_up_metric';
@@ -13,29 +14,30 @@ export async function bus_factor_maintainer_metric(repoURL: string) : Promise<nu
 	const url = repoURL.replace(/^(https?:\/\/)?(www\.)?/i, '');
 	const sections = url.split('/');
 	if (sections[0] === 'npmjs.com') {
-		console.log(`npmjs package: ${sections[2]}`);
+		logger.log({'level': 'info', 'message': `npmjs package: ${sections[2]}`});
 		// Find the GitHub URL for the package
 		repoURL = await findGitHubRepoUrl(sections[2]);
 		if (repoURL === 'none') {
-			console.log(`This npmjs package is not stored in a GitHub repository.`);
+			logger.log({'level': 'error', 'message': `This npmjs package is not stored in a GitHub repository.`});
 			return [bus_factor, responsive_maintainer];
 		}
 	}
 
-	console.log(`GitHub repository: ${repoURL}`);
+	logger.log({'level': 'info', 'message': `GitHub repository: ${repoURL}`});
 
 	// Add check for GitHub URL here (if it is GitHub)
 
-	// Make GraphQL query to GitHub API to get date of most recent pull request
+	// Make GraphQL query to GitHub API to get date of most recent 3 pull requests and number of collaborators
 	const query = `
 		{
-			repository(owner: "maxmichalec", name: "461-project-9") {
-				issues(last: 1, states: OPEN) {
-					edges {
-						node {
-							title
-						}
+			repository(owner: "${sections[1]}", name: "${sections[2]}") {
+				pullRequests(last: 3, orderBy: {field: CREATED_AT, direction: DESC}) {
+					nodes {
+						createdAt
 					}
+				}
+				collaborators {
+					totalCount
 				}
 			}
 		}
@@ -51,11 +53,16 @@ export async function bus_factor_maintainer_metric(repoURL: string) : Promise<nu
 			},
 		});
 
-		gqlRequest.repository.issues.edges.forEach((issue: any) => {
-			console.log(issue.node.title);
+		// Iterate through (up to 3) PRs to calculate part of responsive maintainer metric
+		gqlRequest.repository.pullRequests.nodes.forEach((pullRequest: any) => {
+			responsive_maintainer += 0.16;
+			logger.log({'level': 'info', 'message': `Pull request created at: ${pullRequest.createdAt}`});
 		});
+
+		// Factor in number of collaborators to calculate part of responsive maintainer metric
+		responsive_maintainer += Math.min(0.5, gqlRequest.repository.collaborators.totalCount / 15);
 	} catch (error) {
-		console.error(`Error fetching GitHub repository: ${error}`);
+		logger.log({'level': 'error', 'message': `Error fetching GitHub repository: ${error}`});
 		return [0, 0];
 	}
 

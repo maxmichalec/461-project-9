@@ -41,50 +41,52 @@ var fs = require("fs");
 var license_ramp_up_metric_1 = require("./license_ramp_up_metric");
 var bus_factor_maintainer_metric_1 = require("./bus_factor_maintainer_metric");
 var dotenv = require("dotenv");
+var winston = require("winston");
 // Function to process URL_FILE and produce NDJSON output
 function processUrls(urlFile) {
     return __awaiter(this, void 0, void 0, function () {
-        var filePath, fileContents, urls, l_r_metric_array, bf_rm_metric_array, number, _i, urls_1, url, err_1;
+        var filePath, fileContents, urls, l_r_metric_array, bf_rm_metric_array, number, net_score, _i, urls_1, url, err_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    dotenv.config();
-                    _a.label = 1;
-                case 1:
-                    _a.trys.push([1, 7, , 8]);
+                    _a.trys.push([0, 6, , 7]);
                     filePath = urlFile;
                     fileContents = fs.readFileSync(filePath, 'utf-8');
                     urls = fileContents.split('\n').filter(function (url) { return url.trim() !== ''; });
                     l_r_metric_array = void 0;
                     bf_rm_metric_array = void 0;
                     number = 0;
+                    net_score = 0;
                     _i = 0, urls_1 = urls;
-                    _a.label = 2;
-                case 2:
-                    if (!(_i < urls_1.length)) return [3 /*break*/, 6];
+                    _a.label = 1;
+                case 1:
+                    if (!(_i < urls_1.length)) return [3 /*break*/, 5];
                     url = urls_1[_i];
-                    console.log("The URL that is currently running is ".concat(url));
+                    logger.log({ 'level': 'info', 'message': "The URL that is currently running is ".concat(url) });
                     return [4 /*yield*/, (0, license_ramp_up_metric_1.license_ramp_up_metric)(url)];
-                case 3:
+                case 2:
                     l_r_metric_array = _a.sent(); //returns license metric first and then ramp up metric
-                    console.log('License Metric:', l_r_metric_array[0]);
-                    console.log('Ramp Up Metric:', l_r_metric_array[1]);
-                    console.log('Correctness Metric:', l_r_metric_array[2]);
+                    logger.log({ 'level': 'info', 'message': "The license metric is ".concat(l_r_metric_array[0]) });
+                    logger.log({ 'level': 'info', 'message': "The ramp up metric is ".concat(l_r_metric_array[1]) });
+                    logger.log({ 'level': 'info', 'message': "The correctness metric is ".concat(l_r_metric_array[2]) });
                     return [4 /*yield*/, (0, bus_factor_maintainer_metric_1.bus_factor_maintainer_metric)(url)];
-                case 4:
+                case 3:
                     bf_rm_metric_array = _a.sent();
-                    console.log('Bus Factor Metric:', bf_rm_metric_array[0]);
-                    console.log('Responsive Maintainer Metric:', bf_rm_metric_array[1]);
-                    _a.label = 5;
-                case 5:
+                    logger.log({ 'level': 'info', 'message': "The bus factor metric is ".concat(bf_rm_metric_array[0]) });
+                    logger.log({ 'level': 'info', 'message': "The responsive maintainer metric is ".concat(bf_rm_metric_array[1]) });
+                    // Calculate net score
+                    net_score = l_r_metric_array[0] + l_r_metric_array[1] + l_r_metric_array[2] + bf_rm_metric_array[0] + bf_rm_metric_array[1];
+                    console.log("{\"URL\":\"".concat(url, "\", \"NET_SCORE\":").concat(net_score, ", \"RAMP_UP_SCORE\":").concat(l_r_metric_array[1], ", \"CORRECTNESS_SCORE\":").concat(l_r_metric_array[2], ", \"BUS_FACTOR_SCORE\":").concat(bf_rm_metric_array[0], ", \"RESPONSIVE_MAINTAINER_SCORE\":").concat(bf_rm_metric_array[1], ", \"LICENSE_SCORE\":").concat(l_r_metric_array[0], "}"));
+                    _a.label = 4;
+                case 4:
                     _i++;
-                    return [3 /*break*/, 2];
-                case 6: return [3 /*break*/, 8];
-                case 7:
+                    return [3 /*break*/, 1];
+                case 5: return [3 /*break*/, 7];
+                case 6:
                     err_1 = _a.sent();
-                    console.error('Error:', err_1);
-                    return [3 /*break*/, 8];
-                case 8:
+                    logger.log({ 'level': 'error', 'message': "".concat(err_1) });
+                    return [3 /*break*/, 7];
+                case 7:
                     //console.log('Processing URLs...');
                     process.exit(0);
                     return [2 /*return*/];
@@ -97,21 +99,34 @@ function runTests() {
     // Add code to run your test suite here
     // You can use testing frameworks like Jest, Mocha, etc.
     // Replace the above comment with your actual test suite command.
-    console.log('Running tests...');
+    logger.log({ 'level': 'info', 'message': "Running tests..." });
     process.exit(0);
 }
 // Main CLI
 var args = process.argv.slice(2);
+// Load environment variables from .env file
+dotenv.config();
+// Clear LOG_FILE
+// fs.writeFileSync(process.env.LOG_FILE, '');
+// Configure logging to LOG_FILE
+var logger = winston.createLogger({
+    level: 'info',
+    format: winston.format.simple(),
+    transports: [
+        new winston.transports.File({ filename: process.env.LOG_FILE, level: 'info' }),
+    ],
+});
+exports.default = logger;
 if (args[0] == 'test') {
     runTests();
 }
 else {
     fs.access(args[0], fs.constants.F_OK, function (err) {
         if (err) {
-            console.error("File '".concat(args[0], " does not exist."));
+            logger.log({ 'level': 'error', 'message': "File '".concat(args[0], "' does not exist.") });
         }
         else {
-            console.log("File '".concat(args[0], " exists."));
+            logger.log({ 'level': 'info', 'message': "File '".concat(args[0], "' exists.") });
             processUrls(args[0]);
         }
     });

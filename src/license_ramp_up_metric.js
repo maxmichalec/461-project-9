@@ -38,6 +38,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.license_ramp_up_metric = exports.calculate_correctness_metric = exports.findAllFiles = exports.calculate_ramp_up_metric = exports.countWords = exports.findGitHubRepoUrl = void 0;
+var run_1 = require("./run");
 var fs = require("fs");
 var fse = require("fs-extra");
 var isomorphic_git_1 = require("isomorphic-git");
@@ -71,7 +72,7 @@ function cloneRepository(repoUrl, localPath) {
                     return [3 /*break*/, 3];
                 case 2:
                     error_1 = _a.sent();
-                    console.error('Error cloning repository:', error_1);
+                    run_1.default.log({ 'level': 'error', 'message': "".concat(error_1) });
                     return [3 /*break*/, 3];
                 case 3: return [2 /*return*/];
             }
@@ -89,7 +90,7 @@ function findGitHubRepoUrl(packageName) {
                 case 1:
                     response = _a.sent();
                     if (response.status !== 200) {
-                        console.error("Failed to fetch package metadata for ".concat(packageName));
+                        run_1.default.log({ 'level': 'error', 'message': "Failed to fetch package metadata for ".concat(packageName) });
                         return [2 /*return*/, 'none'];
                     }
                     packageMetadata = response.data;
@@ -100,13 +101,13 @@ function findGitHubRepoUrl(packageName) {
                         return [2 /*return*/, 'https://' + packageMetadata.repository.url.match(/github\.com\/[^/]+\/[^/]+(?=\.git|$)/)];
                     }
                     else {
-                        console.log("No repository URL found for ".concat(packageName));
+                        run_1.default.log({ 'level': 'error', 'message': "No repository URL found for ".concat(packageName) });
                         return [2 /*return*/, 'none'];
                     }
                     return [3 /*break*/, 3];
                 case 2:
                     error_2 = _a.sent();
-                    console.error("Error fetching package.json for ".concat(packageName, ":"));
+                    run_1.default.log({ 'level': 'error', 'message': "".concat(error_2) });
                     return [2 /*return*/, 'none'];
                 case 3: return [2 /*return*/];
             }
@@ -254,7 +255,7 @@ function license_ramp_up_metric(repoURL) {
                         //console.log('Temporary directory deleted.');
                     }
                     catch (err) {
-                        console.error('Error deleting temporary directory:', err);
+                        run_1.default.log({ 'level': 'error', 'message': "".concat(err) });
                     }
                     return [2 /*return*/, ([license_met, ramp_up_met, correctness_met])];
             }

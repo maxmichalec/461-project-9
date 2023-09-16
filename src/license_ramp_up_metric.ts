@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import logger from './run'
 import * as fs from 'fs';
 import * as fse from 'fs-extra';
 import git from 'isomorphic-git'; 
@@ -27,7 +28,7 @@ async function cloneRepository(repoUrl: string, localPath: string): Promise<void
     //console.log('Repository cloned successfully.');
 
   } catch (error) {
-    console.error('Error cloning repository:', error);
+    logger.log({'level': 'error', 'message': `${error}`});
   }
 }
 
@@ -38,7 +39,7 @@ export async function findGitHubRepoUrl(packageName: string): Promise<string> {
     const response = await axios.get(`https://registry.npmjs.org/${packageName}`);
 
     if (response.status !== 200) {
-      console.error(`Failed to fetch package metadata for ${packageName}`);
+      logger.log({'level': 'error', 'message': `Failed to fetch package metadata for ${packageName}`});
       return 'none';
     }
 
@@ -51,11 +52,11 @@ export async function findGitHubRepoUrl(packageName: string): Promise<string> {
     if (packageMetadata.repository && packageMetadata.repository.url) {
       return 'https://' + packageMetadata.repository.url.match(/github\.com\/[^/]+\/[^/]+(?=\.git|$)/);
     } else {
-      console.log(`No repository URL found for ${packageName}`);
+      logger.log({'level': 'error', 'message': `No repository URL found for ${packageName}`});
       return 'none';
     }
   } catch (error) {
-    console.error(`Error fetching package.json for ${packageName}:`);
+    logger.log({'level': 'error', 'message': `${error}`});
     return 'none';
   }
 } 
@@ -188,7 +189,7 @@ export async function license_ramp_up_metric(repoURL: string): Promise<number[]>
       fse.removeSync(repoDir); 
       //console.log('Temporary directory deleted.');
     } catch (err) {
-      console.error('Error deleting temporary directory:', err);
+      logger.log({'level': 'error', 'message': `${err}`});
     }
 
 

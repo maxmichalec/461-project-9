@@ -5,6 +5,7 @@ I cannot think of a better way to check our own code for correctness and code st
 NOTE: This code does not properally check error handling yet.
 */
 
+import logger from './run';
 import { execSync } from 'child_process';
 
 function getLintScore(): number {
@@ -24,13 +25,13 @@ function getLintScore(): number {
 
     return lintScore;
   } catch (error) {
-    console.error('Error running ESLint:', error);
+    logger.log({'level': 'error', 'message': `Error running ESLint: ${error}`});
     return 0; // Return 0 in case of an error
   }
 }
 
 const score = getLintScore();
-console.log('Lint Score:', score);
+logger.log({'level': 'info', 'message': `Lint Score: ${score}`});
 process.exit(score > 0.5 ? 1 : 0); // Exit with status code 1 if lint score > 0.5, else 0
 
 
