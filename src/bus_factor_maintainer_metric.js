@@ -44,7 +44,7 @@ var license_ramp_up_metric_1 = require("./license_ramp_up_metric");
 var node_fetch_1 = require("node-fetch");
 function bus_factor_maintainer_metric(repoURL) {
     return __awaiter(this, void 0, void 0, function () {
-        var bus_factor, responsive_maintainer, url, sections, query, gqlRequest, error_1;
+        var bus_factor, responsive_maintainer, url, sections, topContributorsURL, response, contributors, error_1, contributorsURL, response, header, lastPage, error_2, query, gqlRequest, error_3;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -60,15 +60,74 @@ function bus_factor_maintainer_metric(repoURL) {
                     repoURL = _a.sent();
                     if (repoURL === 'none') {
                         run_1.default.log({ 'level': 'error', 'message': "This npmjs package is not stored in a GitHub repository." });
-                        return [2 /*return*/, [bus_factor, responsive_maintainer]];
+                        return [2 /*return*/, [0, 0]];
                     }
                     _a.label = 2;
                 case 2:
+                    // Check if the URL is a valid GitHub repository URL
+                    if (!repoURL.match(/^(https:\/\/)?(www\.)?github\.com\/[^/]+\/[^/]+$/i)) {
+                        run_1.default.log({ 'level': 'error', 'message': "Invalid GitHub repository URL: ".concat(repoURL) });
+                        return [2 /*return*/, [0, 0]];
+                    }
                     run_1.default.log({ 'level': 'info', 'message': "GitHub repository: ".concat(repoURL) });
-                    query = "\n\t\t{\n\t\t\trepository(owner: \"".concat(sections[1], "\", name: \"").concat(sections[2], "\") {\n\t\t\t\tpullRequests(last: 3, orderBy: {field: CREATED_AT, direction: DESC}) {\n\t\t\t\t\tnodes {\n\t\t\t\t\t\tcreatedAt\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\tcollaborators {\n\t\t\t\t\ttotalCount\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t");
+                    topContributorsURL = "https://api.github.com/repos/".concat(sections[1], "/").concat(sections[2], "/contributors?per_page=10");
                     _a.label = 3;
                 case 3:
-                    _a.trys.push([3, 5, , 6]);
+                    _a.trys.push([3, 6, , 7]);
+                    return [4 /*yield*/, (0, node_fetch_1.default)(topContributorsURL, {
+                            headers: {
+                                authorization: "token ".concat(process.env.GITHUB_TOKEN),
+                            },
+                        })];
+                case 4:
+                    response = _a.sent();
+                    if (response.status !== 200) {
+                        run_1.default.log({ 'level': 'error', 'message': "Failed to fetch GitHub contributors: Response ".concat(response.status) });
+                        return [2 /*return*/, [0, 0]];
+                    }
+                    return [4 /*yield*/, response.json()];
+                case 5:
+                    contributors = _a.sent();
+                    // Iterate through (up to 10) contributors to calculate part of bus factor metric
+                    contributors.forEach(function (contributor) {
+                        bus_factor += 0.1 * Math.min(contributor.contributions / 30, 1);
+                        run_1.default.log({ 'level': 'info', 'message': "Contributor login: ".concat(contributor.login) });
+                    });
+                    return [3 /*break*/, 7];
+                case 6:
+                    error_1 = _a.sent();
+                    run_1.default.log({ 'level': 'error', 'message': "Error fetching GitHub contributors: ".concat(error_1) });
+                    return [2 /*return*/, [0, 0]];
+                case 7:
+                    contributorsURL = "https://api.github.com/repos/".concat(sections[1], "/").concat(sections[2], "/contributors?per_page=1&anon=1");
+                    _a.label = 8;
+                case 8:
+                    _a.trys.push([8, 10, , 11]);
+                    return [4 /*yield*/, (0, node_fetch_1.default)(contributorsURL, {
+                            headers: {
+                                authorization: "token ".concat(process.env.GITHUB_TOKEN),
+                            },
+                        })];
+                case 9:
+                    response = _a.sent();
+                    if (response.status !== 200) {
+                        run_1.default.log({ 'level': 'error', 'message': "Failed to fetch GitHub contributors: Response ".concat(response.status) });
+                        return [2 /*return*/, [0, 0]];
+                    }
+                    header = response.headers.get('link');
+                    lastPage = parseInt(header.match(/page=(\d+)>; rel="last"/)[1]);
+                    // Factor in number of collaborators to calculate part of responsive maintainer metric
+                    responsive_maintainer += Math.min(0.5, lastPage / 15);
+                    return [3 /*break*/, 11];
+                case 10:
+                    error_2 = _a.sent();
+                    run_1.default.log({ 'level': 'error', 'message': "Error fetching GitHub contributors: ".concat(error_2) });
+                    return [2 /*return*/, [bus_factor, 0]];
+                case 11:
+                    query = "\n\t\t{\n\t\t\trepository(owner: \"".concat(sections[1], "\", name: \"").concat(sections[2], "\") {\n\t\t\t\tpullRequests(last: 3, orderBy: {field: CREATED_AT, direction: DESC}) {\n\t\t\t\t\tnodes {\n\t\t\t\t\t\tcreatedAt\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t");
+                    _a.label = 12;
+                case 12:
+                    _a.trys.push([12, 14, , 15]);
                     return [4 /*yield*/, (0, graphql_1.graphql)(query, {
                             headers: {
                                 authorization: "token ".concat(process.env.GITHUB_TOKEN),
@@ -77,21 +136,21 @@ function bus_factor_maintainer_metric(repoURL) {
                                 fetch: node_fetch_1.default,
                             },
                         })];
-                case 4:
+                case 13:
                     gqlRequest = _a.sent();
-                    // Iterate through (up to 3) PRs to calculate part of responsive maintainer metric
+                    // Iterate through (up to 5) PRs to calculate part of responsive maintainer metric
+                    // Calculate number of days since each PR was created (best if within past 2 weeks)
                     gqlRequest.repository.pullRequests.nodes.forEach(function (pullRequest) {
-                        responsive_maintainer += 0.16;
+                        var daysSince = Math.floor((new Date().getTime() - new Date(pullRequest.createdAt).getTime()) / (1000 * 3600 * 24));
+                        responsive_maintainer += 0.1 * Math.min(14 / Math.max(daysSince, 14), 1);
                         run_1.default.log({ 'level': 'info', 'message': "Pull request created at: ".concat(pullRequest.createdAt) });
                     });
-                    // Factor in number of collaborators to calculate part of responsive maintainer metric
-                    responsive_maintainer += Math.min(0.5, gqlRequest.repository.collaborators.totalCount / 15);
-                    return [3 /*break*/, 6];
-                case 5:
-                    error_1 = _a.sent();
-                    run_1.default.log({ 'level': 'error', 'message': "Error fetching GitHub repository: ".concat(error_1) });
-                    return [2 /*return*/, [0, 0]];
-                case 6: return [2 /*return*/, [bus_factor, responsive_maintainer]];
+                    return [3 /*break*/, 15];
+                case 14:
+                    error_3 = _a.sent();
+                    run_1.default.log({ 'level': 'error', 'message': "Error fetching GitHub repository via GraphQL: ".concat(error_3) });
+                    return [2 /*return*/, [bus_factor, 0]];
+                case 15: return [2 /*return*/, [bus_factor, responsive_maintainer]];
             }
         });
     });

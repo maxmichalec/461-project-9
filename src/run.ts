@@ -35,10 +35,10 @@ async function processUrls(urlFile: string) {
       logger.log({'level': 'info', 'message': `The bus factor metric is ${bf_rm_metric_array[0]}`});
       logger.log({'level': 'info', 'message': `The responsive maintainer metric is ${bf_rm_metric_array[1]}`});
 
-      // Calculate net score
-      net_score = l_r_metric_array[0] + l_r_metric_array[1] + l_r_metric_array[2] + bf_rm_metric_array[0] + bf_rm_metric_array[1];
+      // Calculate net score: (0.35 * correctness + 0.25 * maintainer + 0.2 * bus factor + 0.2 * ramp up) * license
+      net_score = (0.35 * l_r_metric_array[2] + 0.25 * bf_rm_metric_array[1] + 0.2 * bf_rm_metric_array[0] + 0.2 * l_r_metric_array[1]) * l_r_metric_array[0];
 
-      console.log(`{"URL":"${url}", "NET_SCORE":${net_score}, "RAMP_UP_SCORE":${l_r_metric_array[1]}, "CORRECTNESS_SCORE":${l_r_metric_array[2]}, "BUS_FACTOR_SCORE":${bf_rm_metric_array[0]}, "RESPONSIVE_MAINTAINER_SCORE":${bf_rm_metric_array[1]}, "LICENSE_SCORE":${l_r_metric_array[0]}}`);
+      console.log(`{"URL":"${url}", "NET_SCORE":${net_score.toFixed(5)}, "RAMP_UP_SCORE":${l_r_metric_array[1].toFixed(5)}, "CORRECTNESS_SCORE":${l_r_metric_array[2].toFixed(5)}, "BUS_FACTOR_SCORE":${bf_rm_metric_array[0].toFixed(5)}, "RESPONSIVE_MAINTAINER_SCORE":${bf_rm_metric_array[1].toFixed(5)}, "LICENSE_SCORE":${l_r_metric_array[0].toFixed(5)}}`);
     }
   } catch (err) {
     logger.log({'level': 'error', 'message': `${err}`});
@@ -65,16 +65,30 @@ const args = process.argv.slice(2);
 // Load environment variables from .env file
 dotenv.config();
 
-// Clear LOG_FILE
-// fs.writeFileSync(process.env.LOG_FILE, '');
+let logFile: string;
+
+if (process.env.LOG_FILE === undefined) {
+  logFile = 'run.log';
+} else {
+  logFile = process.env.LOG_FILE;
+}
 
 // Configure logging to LOG_FILE
 const logger = winston.createLogger({
   level: 'info',
   format: winston.format.simple(),
   transports: [
-    new winston.transports.File({ filename: process.env.LOG_FILE, level: 'info' }),
+    new winston.transports.File({ filename: logFile, level: 'info' }),
   ],
+});
+
+// Clear LOG_FILE (remove from logger transport if unable to access)
+fs.access(logFile, fs.constants.F_OK, (err) => {
+  if (err) {
+    logger.remove(winston.transports.File);
+  } else {
+    fs.writeFileSync(logFile, '');
+  }
 });
 
 export default logger;
