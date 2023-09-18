@@ -16,10 +16,9 @@ if [ "$1" == "install" ]; then
     npm install @octokit/graphql > "mylog.txt" 2>&1 
     npm install dotenv > "mylog.txt" 2>&1 
     npm install winston > "mylog.txt" 2>&1 
-    npm install @types/jest ts-jest > "mylog.txt" 2>&1 
+    npm install --save-dev @types/jest ts-jest > "mylog.txt" 2>&1 
     npm install istanbul-lib-coverage istanbul-reports nyc > "mylog.txt" 2>&1 
     npm install @types/node-fetch > "mylog.txt" 2>&1 
-    npm install jest-simple-summary-reporter
     echo "19 dependencies installed..."
 elif [ "$1" == "test" ]; then
     npx jest --coverage > "jest.log.txt" 2>&1

@@ -1,5 +1,5 @@
 // tests/license_ramp_up_metric.test.ts
-import * as fs from 'fs-extra';
+import * as fse from 'fs-extra';
 import { license_ramp_up_metric, findGitHubRepoUrl, countWords, calculate_ramp_up_metric, findAllFiles } from '../license_ramp_up_metric';
 
 describe('license_ramp_up_metric', () => {
@@ -136,16 +136,16 @@ describe('findAllFiles', () => {
 
   beforeAll(() => {
     // Create a temporary directory with some files and subdirectories
-    fs.mkdirSync(testDirectory);
-    fs.writeFileSync(`${testDirectory}/file1.ts`, 'Some content');
-    fs.mkdirSync(`${testDirectory}/subdirectory`);
-    fs.writeFileSync(`${testDirectory}/subdirectory/file2.ts`, 'Some content');
-    fs.writeFileSync(`${testDirectory}/file3.js`, 'Some content');
+    fse.mkdirSync(testDirectory);
+    fse.writeFileSync(`${testDirectory}/file1.ts`, 'Some content');
+    fse.mkdirSync(`${testDirectory}/subdirectory`);
+    fse.writeFileSync(`${testDirectory}/subdirectory/file2.ts`, 'Some content');
+    fse.writeFileSync(`${testDirectory}/file3.js`, 'Some content');
   });
 
   afterAll(() => {
     // Remove the temporary directory after tests
-    fs.removeSync(testDirectory);
+    fse.removeSync(testDirectory);
   });
 
   it('should find all TypeScript files in a directory', () => {
@@ -154,16 +154,16 @@ describe('findAllFiles', () => {
       `${testDirectory}\\file1.ts`,
       `${testDirectory}\\subdirectory\\file2.ts`,
     ]);
-    fs.removeSync(testDirectory); 
+    fse.removeSync(testDirectory); 
   });
 
   it('should return an empty array if no TypeScript files are found', () => {
     // Create a directory with non-TypeScript files    
-    fs.mkdirSync(testDirectory);
-    fs.writeFileSync(`${testDirectory}/file4.js`, 'Some content');
+    fse.mkdirSync(testDirectory);
+    fse.writeFileSync(`${testDirectory}/file4.js`, 'Some content');
     const result = findAllFiles(testDirectory);
     expect(result).toEqual([]);
     // Clean up the non-TypeScript file
-    fs.unlinkSync(`${testDirectory}/file4.js`);
+    fse.unlinkSync(`${testDirectory}/file4.js`);
   });
 });

@@ -37,6 +37,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.runTests = exports.processUrls = void 0;
 var fs = require("fs");
 var license_ramp_up_metric_1 = require("./license_ramp_up_metric");
 var bus_factor_maintainer_metric_1 = require("./bus_factor_maintainer_metric");
@@ -86,18 +87,16 @@ function processUrls(urlFile) {
                     err_1 = _a.sent();
                     logger.log({ 'level': 'error', 'message': "".concat(err_1) });
                     return [3 /*break*/, 7];
-                case 7:
-                    //console.log('Processing URLs...');
-                    process.exit(0);
-                    return [2 /*return*/];
+                case 7: return [2 /*return*/];
             }
         });
     });
 }
+exports.processUrls = processUrls;
 // Function to run the test suite
-function runTests() {
+function runTests(file) {
     //Parsing the output from Jest here 
-    var text = fs.readFileSync('./jest.log.txt', 'utf-8');
+    var text = fs.readFileSync(file, 'utf-8');
     var lines = text.split('\n');
     var totalTests = 0;
     var passedTests = 0;
@@ -105,16 +104,19 @@ function runTests() {
     for (var _i = 0, lines_1 = lines; _i < lines_1.length; _i++) {
         var line = lines_1[_i];
         if (line.includes('Tests: ')) {
-            var match = line.match(/Tests:\s+(\d+)\spassed,\s+(\d+)\stotal/);
+            var match = line.match(/(\d+) passed/);
             if (match) {
                 passedTests = parseInt(match[1]);
-                totalTests = parseInt(match[2]);
+            }
+            match = line.match(/(\d+) total/);
+            if (match) {
+                totalTests = parseInt(match[1]);
             }
         }
         else if (line.includes('Lines')) {
-            var match = line.match(/Lines\s+:\s+([\d.]+)%/);
-            if (match) {
-                coveragePercentage = parseFloat(match[1]);
+            var match_1 = line.match(/Lines\s+:\s+([\d.]+)%/);
+            if (match_1) {
+                coveragePercentage = parseFloat(match_1[1]);
             }
         }
     }
@@ -124,8 +126,9 @@ function runTests() {
     console.log("Coverage: ".concat(coverageText));
     console.log("".concat(passedTests, "/").concat(totalTests, " test cases passed. ").concat(coverageText, " line coverage achieved."));
     logger.log({ 'level': 'info', 'message': "Running tests..." });
-    process.exit(0);
+    //process.exit(0);
 }
+exports.runTests = runTests;
 // Main CLI
 var args = process.argv.slice(2);
 // Load environment variables from .env file
@@ -156,9 +159,9 @@ fs.access(logFile, fs.constants.F_OK, function (err) {
 });
 exports.default = logger;
 if (args[0] == 'test') {
-    runTests();
+    runTests('./jest.log.txt');
 }
-else {
+else if (args[0] !== undefined) {
     fs.access(args[0], fs.constants.F_OK, function (err) {
         if (err) {
             logger.log({ 'level': 'error', 'message': "File '".concat(args[0], "' does not exist.") });

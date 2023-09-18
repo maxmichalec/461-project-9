@@ -6,7 +6,7 @@ import * as dotenv from 'dotenv';
 import * as winston from 'winston';
 
 // Function to process URL_FILE and produce NDJSON output
-async function processUrls(urlFile: string) {
+export async function processUrls(urlFile: string) {
 
   // Add code to process URLs and generate NDJSON output here
   // You can use libraries like axios or node-fetch to fetch data from URLs.
@@ -45,14 +45,14 @@ async function processUrls(urlFile: string) {
   }
 
   //console.log('Processing URLs...');
-  process.exit(0);
+  //process.exit(0);
 }
 
 // Function to run the test suite
-function runTests() {
+export function runTests(file: string) {
   //Parsing the output from Jest here 
 
-  const text = fs.readFileSync('./jest.log.txt', 'utf-8'); 
+  const text = fs.readFileSync(file, 'utf-8'); 
   const lines = text.split('\n');
   let totalTests = 0; 
   let passedTests = 0; 
@@ -60,10 +60,13 @@ function runTests() {
 
   for (const line of lines) {
     if (line.includes('Tests: ')) {
-      const match = line.match(/Tests:\s+(\d+)\spassed,\s+(\d+)\stotal/);
+      var match = line.match(/(\d+) passed/);
       if(match) {
         passedTests = parseInt(match[1]);
-        totalTests = parseInt(match[2]); 
+      }
+      match = line.match(/(\d+) total/); 
+      if(match) {
+        totalTests = parseInt(match[1]); 
       }
     } 
     else if (line.includes('Lines')) {
@@ -80,7 +83,7 @@ function runTests() {
   console.log(`${passedTests}/${totalTests} test cases passed. ${coverageText} line coverage achieved.`)
 
   logger.log({'level': 'info', 'message': `Running tests...`});
-  process.exit(0);
+  //process.exit(0);
 }
 
 // Main CLI
@@ -119,9 +122,9 @@ export default logger;
 
 if(args[0] == 'test')
 {
-    runTests();
+    runTests('./jest.log.txt');
 }
-else 
+else if(args[0] !== undefined)
 {
     fs.access(args[0], fs.constants.F_OK, (err) => {
         if (err) {

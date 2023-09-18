@@ -7,5 +7,5 @@ module.exports = {
   testTimeout: 1000000,
   collectCoverage: true,
   collectCoverageFrom: ['<rootDir>/src/*.ts'], // Adjust the path to match your source files
-  coverageReporters: ['text', 'text-summary'],
+  coverageReporters: ['text', 'text-summary', 'html'],
 };  
