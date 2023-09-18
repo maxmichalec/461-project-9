@@ -1,27 +1,30 @@
 #!/bin/bash
 
 if [ "$1" == "install" ]; then 
-    echo "Installing modules..." 
     #npm install message 
-    npm install fs || echo "Error: fs not installed correctly"
-    npm install fs-extra || echo "Error: fs-extra not installed correctly"
-    npm install isomorphic-git || echo "Error: isomorphic-git not installed correctly"
-    npm install typescript || echo "Error: typescript not installed correctly"
-    npm install @types/node || echo "Error: @types/node not installed correctly"
-    npm install axios || echo "Error: axios not installed correctly"
-    npm install tmp || echo "Error: tmp not installed correctly"
-    npm install jest || echo "Error: jest not installed correctly"
-    npm install eslint || echo "Error: eslint not installed correctly"
-    npm install @typescript-eslint/parser @typescript-eslint/eslint-plugin 
-    npm install node-fetch@2 || echo "Error: node-fetch@2 not installed correctly"
-    npm install @octokit/graphql || echo "Error: @octokit/graphql not installed correctly"
-    npm install dotenv || echo "Error: dotenv not installed correctly"
-    npm install winston || echo "Error: winston not installed correctly"
-    npm install @types/jest ts-jest 
-    npm install istanbul-lib-coverage istanbul-reports nyc
-    echo "Modules installed successfully."
+    npm install fs > "mylog.txt" 2>&1
+    npm install fs-extra > "mylog.txt" 2>&1 
+    npm install isomorphic-git > "mylog.txt" 2>&1 
+    npm install typescript > "mylog.txt" 2>&1 
+    npm install @types/node > "mylog.txt" 2>&1 
+    npm install axios > "mylog.txt" 2>&1 
+    npm install tmp > "mylog.txt" 2>&1 
+    npm install jest > "mylog.txt" 2>&1 
+    npm install eslint > "mylog.txt" 2>&1 
+    npm install @typescript-eslint/parser @typescript-eslint/eslint-plugin > "mylog.txt" 2>&1 
+    npm install node-fetch@2 > "mylog.txt" 2>&1 
+    npm install @octokit/graphql > "mylog.txt" 2>&1 
+    npm install dotenv > "mylog.txt" 2>&1 
+    npm install winston > "mylog.txt" 2>&1 
+    npm install @types/jest ts-jest > "mylog.txt" 2>&1 
+    npm install istanbul-lib-coverage istanbul-reports nyc > "mylog.txt" 2>&1 
+    npm install @types/node-fetch > "mylog.txt" 2>&1 
+    npm install jest-simple-summary-reporter
+    echo "19 dependencies installed..."
 elif [ "$1" == "test" ]; then
-    npx jest --coverage
+    npx jest --coverage > "jest.log.txt" 2>&1
+    tsc src/run.ts
+    node src/run.js "$@"
 else
     tsc src/run.ts
     node src/run.js "$@"

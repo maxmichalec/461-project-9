@@ -50,10 +50,34 @@ async function processUrls(urlFile: string) {
 
 // Function to run the test suite
 function runTests() {
-  // Add code to run your test suite here
-  // You can use testing frameworks like Jest, Mocha, etc.
+  //Parsing the output from Jest here 
 
-  // Replace the above comment with your actual test suite command.
+  const text = fs.readFileSync('./jest.log.txt', 'utf-8'); 
+  const lines = text.split('\n');
+  let totalTests = 0; 
+  let passedTests = 0; 
+  let coveragePercentage = 0; 
+
+  for (const line of lines) {
+    if (line.includes('Tests: ')) {
+      const match = line.match(/Tests:\s+(\d+)\spassed,\s+(\d+)\stotal/);
+      if(match) {
+        passedTests = parseInt(match[1]);
+        totalTests = parseInt(match[2]); 
+      }
+    } 
+    else if (line.includes('Lines')) {
+      const match = line.match(/Lines\s+:\s+([\d.]+)%/);
+      if(match) {
+        coveragePercentage = parseFloat(match[1]); 
+      }
+    }
+  }
+  const coverageText = `${coveragePercentage.toFixed(2)}%`; 
+  console.log(`Total: ${totalTests}`);
+  console.log(`Passed: ${passedTests}`); 
+  console.log(`Coverage: ${coverageText}`); 
+  console.log(`${passedTests}/${totalTests} test cases passed. ${coverageText} line coverage achieved.`)
 
   logger.log({'level': 'info', 'message': `Running tests...`});
   process.exit(0);

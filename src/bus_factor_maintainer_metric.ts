@@ -73,7 +73,21 @@ export async function bus_factor_maintainer_metric(repoURL: string) : Promise<nu
 
 		// Get page number before rel="last" in header
 		const header = response.headers.get('link');
-		const lastPage = parseInt(header.match(/page=(\d+)>; rel="last"/)[1]);
+		var matchResult; 
+		var lastPage; 
+		if(header) {
+			matchResult = header.match(/page=(\d+)>; rel="last"/); 
+			if(matchResult){
+				lastPage = parseInt(matchResult[1]); 
+			}
+			else {
+				lastPage = 0; 
+			}
+		}
+		else {
+			lastPage = 0; 
+		}
+		//const lastPage = parseInt(header.match(/page=(\d+)>; rel="last"/)[1]);
 		// Factor in number of collaborators to calculate part of responsive maintainer metric
 		responsive_maintainer += Math.min(0.5, lastPage / 15);
 	} catch	(error) {

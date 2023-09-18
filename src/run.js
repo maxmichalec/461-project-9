@@ -96,9 +96,33 @@ function processUrls(urlFile) {
 }
 // Function to run the test suite
 function runTests() {
-    // Add code to run your test suite here
-    // You can use testing frameworks like Jest, Mocha, etc.
-    // Replace the above comment with your actual test suite command.
+    //Parsing the output from Jest here 
+    var text = fs.readFileSync('./jest.log.txt', 'utf-8');
+    var lines = text.split('\n');
+    var totalTests = 0;
+    var passedTests = 0;
+    var coveragePercentage = 0;
+    for (var _i = 0, lines_1 = lines; _i < lines_1.length; _i++) {
+        var line = lines_1[_i];
+        if (line.includes('Tests: ')) {
+            var match = line.match(/Tests:\s+(\d+)\spassed,\s+(\d+)\stotal/);
+            if (match) {
+                passedTests = parseInt(match[1]);
+                totalTests = parseInt(match[2]);
+            }
+        }
+        else if (line.includes('Lines')) {
+            var match = line.match(/Lines\s+:\s+([\d.]+)%/);
+            if (match) {
+                coveragePercentage = parseFloat(match[1]);
+            }
+        }
+    }
+    var coverageText = "".concat(coveragePercentage.toFixed(2), "%");
+    console.log("Total: ".concat(totalTests));
+    console.log("Passed: ".concat(passedTests));
+    console.log("Coverage: ".concat(coverageText));
+    console.log("".concat(passedTests, "/").concat(totalTests, " test cases passed. ").concat(coverageText, " line coverage achieved."));
     logger.log({ 'level': 'info', 'message': "Running tests..." });
     process.exit(0);
 }

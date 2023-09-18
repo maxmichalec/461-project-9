@@ -7,6 +7,6 @@
     "strict": true,
     "types": ["jest"]
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "src/__tests__/custom-reporter.js"],
   "exclude": ["node_modules"]
 }
