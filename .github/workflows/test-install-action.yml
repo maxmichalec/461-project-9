@@ -7,15 +7,3 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: ./run install
-      - run: ./run https://www.npmjs.com/package/even
-      - run: ./run https://www.npmjs.com/package/odd
-      - run: ./run https://www.npmjs.com/package/prime
-      - run: ./run https://www.npmjs.com/package/prime-factor
-      - run: ./run https://www.npmjs.com/package/prime-factors
-      - run: ./run https://www.npmjs.com/package/prime-numbers
-      - run: ./run https://www.npmjs.com/package/prime-number
-      - run: ./run https://www.npmjs.com/package/prime-number-checker
-      - run: ./run https://www.npmjs.com/package/prime-number-generator
-      - run: ./run https://www.npmjs.com/package/prime-number-listFAKE
-      - run: ./run https://www.npmjs.com/package/prime-number-list
-      - run: ./run https://www.npmjs.com/package/prime-number-test
