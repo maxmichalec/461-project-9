@@ -1,4 +1,3 @@
-import * as fs from 'fs';
 import * as fse from 'fs-extra';
 import { processUrls, runTests } from '../run'; // Import the functions you want to test
 

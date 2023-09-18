@@ -126,7 +126,6 @@ function runTests(file) {
     console.log("Coverage: ".concat(coverageText));
     console.log("".concat(passedTests, "/").concat(totalTests, " test cases passed. ").concat(coverageText, " line coverage achieved."));
     logger.log({ 'level': 'info', 'message': "Running tests..." });
-    //process.exit(0);
 }
 exports.runTests = runTests;
 // Main CLI

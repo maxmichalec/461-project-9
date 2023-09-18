@@ -7,11 +7,6 @@ import * as winston from 'winston';
 
 // Function to process URL_FILE and produce NDJSON output
 export async function processUrls(urlFile: string) {
-
-  // Add code to process URLs and generate NDJSON output here
-  // You can use libraries like axios or node-fetch to fetch data from URLs.
-
-  // Replace the above comment with your actual code.
   try {
     const filePath = urlFile; // Replace with the path to your file
     const fileContents = fs.readFileSync(filePath, 'utf-8');
@@ -43,9 +38,6 @@ export async function processUrls(urlFile: string) {
   } catch (err) {
     logger.log({'level': 'error', 'message': `${err}`});
   }
-
-  //console.log('Processing URLs...');
-  //process.exit(0);
 }
 
 // Function to run the test suite
@@ -83,7 +75,6 @@ export function runTests(file: string) {
   console.log(`${passedTests}/${totalTests} test cases passed. ${coverageText} line coverage achieved.`)
 
   logger.log({'level': 'info', 'message': `Running tests...`});
-  //process.exit(0);
 }
 
 // Main CLI
