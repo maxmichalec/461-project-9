@@ -1,0 +1,9 @@
+name: test-install-action
+run-name: ${{ github.actor }} is testing ./run install
+on: [push]
+jobs:
+  run-install:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: ./run install
