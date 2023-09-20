@@ -1,0 +1,26 @@
+name: jest-unit-test
+run-name: ${{ github.actor }} is running a unit test with jest
+on: [push]
+jobs:
+  run-install-test:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "The job was automatically triggered by a ${{ github.event_name }} event."
+      - run: echo "The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
+
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+            node-version: '14'
+      
+      - name: Install Dependencies
+        run: ./run install
+
+      - name: Run Tests
+        run: ./run test
+
+      - name: Job Status
+        run: echo "This job's status is ${{ job.status }}."
