@@ -151,8 +151,8 @@ describe('findAllFiles', () => {
   it('should find all TypeScript files in a directory', () => {
     const result = findAllFiles(testDirectory);
     expect(result).toEqual([
-      `${testDirectory}\\file1.ts`,
-      `${testDirectory}\\subdirectory\\file2.ts`,
+      `${testDirectory}/file1.ts`,
+      `${testDirectory}/subdirectory/file2.ts`,
     ]);
     fse.removeSync(testDirectory); 
   });
