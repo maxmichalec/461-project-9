@@ -37,15 +37,14 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.bus_factor_maintainer_metric = void 0;
+exports.bus_factor_maintainer_metric = exports.calculateResponsiveMaintainer = exports.calculateBusFactor = exports.fetchResponse = exports.fetchContributors = void 0;
 var run_1 = require("./run");
 var license_ramp_up_metric_1 = require("./license_ramp_up_metric");
 var node_fetch_1 = require("node-fetch");
-// NEW CODE
 // Function to fetch contributors from GitHub API
 function fetchContributors(url) {
     return __awaiter(this, void 0, void 0, function () {
-        var response, contributors, error_1;
+        var response, error_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -60,21 +59,20 @@ function fetchContributors(url) {
                     response = _a.sent();
                     if (response.status !== 200) {
                         run_1.default.log({ 'level': 'error', 'message': "Failed to fetch GitHub contributors: Response ".concat(response.status) });
-                        return [2 /*return*/, [response, null]];
+                        return [2 /*return*/, null];
                     }
                     return [4 /*yield*/, response.json()];
-                case 2:
-                    contributors = _a.sent();
-                    return [2 /*return*/, [response, contributors]];
+                case 2: return [2 /*return*/, _a.sent()];
                 case 3:
                     error_1 = _a.sent();
                     run_1.default.log({ 'level': 'error', 'message': "Error fetching GitHub contributors: ".concat(error_1) });
-                    return [2 /*return*/, [null, null]];
+                    return [2 /*return*/, null];
                 case 4: return [2 /*return*/];
             }
         });
     });
 }
+exports.fetchContributors = fetchContributors;
 // Function to fetch contributors from GitHub API
 function fetchResponse(url) {
     return __awaiter(this, void 0, void 0, function () {
@@ -105,6 +103,7 @@ function fetchResponse(url) {
         });
     });
 }
+exports.fetchResponse = fetchResponse;
 // Function to calculate bus factor based on contributors
 function calculateBusFactor(contributors) {
     var busFactor = 0;
@@ -114,12 +113,14 @@ function calculateBusFactor(contributors) {
     });
     return busFactor;
 }
+exports.calculateBusFactor = calculateBusFactor;
 // Function to calculate responsive maintainer based on contributors and last page
 function calculateResponsiveMaintainer(contributors, lastPage) {
     var contributorsFactor = Math.min(0.5, lastPage / 15);
     // Add your calculation logic here based on contributors
     return contributorsFactor;
 }
+exports.calculateResponsiveMaintainer = calculateResponsiveMaintainer;
 function bus_factor_maintainer_metric(repoURL) {
     return __awaiter(this, void 0, void 0, function () {
         var busFactor, responsiveMaintainer, url, sections, topContributorsURL, contributors, contributorsPerPageURL, contributorsPerPage, response, header, matchResult, lastPage;

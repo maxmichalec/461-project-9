@@ -5,10 +5,8 @@ import { graphql, GraphQlQueryResponseData } from '@octokit/graphql';
 import { findGitHubRepoUrl } from './license_ramp_up_metric';
 import fetch from 'node-fetch';
 
-
-// NEW CODE
 // Function to fetch contributors from GitHub API
-async function fetchContributors(url: string): Promise<any[] | null> {
+export async function fetchContributors(url: string): Promise<any[] | null> {
   try {
     const response = await fetch(url, {
       headers: {
@@ -19,19 +17,19 @@ async function fetchContributors(url: string): Promise<any[] | null> {
 
     if (response.status !== 200) {
       logger.log({'level': 'error', 'message': `Failed to fetch GitHub contributors: Response ${response.status}`});
-      return [response, null];
+      return null;
     }
 
-    const contributors = await response.json();
-	return [response, contributors]
+    return await response.json();
+
   } catch (error) {
     logger.log({'level': 'error', 'message': `Error fetching GitHub contributors: ${error}`});
-    return [null, null];
+    return null;
   }
 }
 
 // Function to fetch contributors from GitHub API
-async function fetchResponse(url: string): Promise<any | null> {
+export async function fetchResponse(url: string): Promise<any | null> {
 	try {
 	  const response = await fetch(url, {
 		headers: {
@@ -53,7 +51,7 @@ async function fetchResponse(url: string): Promise<any | null> {
   }
 
 // Function to calculate bus factor based on contributors
-function calculateBusFactor(contributors: any[]): number {
+export function calculateBusFactor(contributors: any[]): number {
   let busFactor = 0;
   contributors.forEach((contributor) => {
     busFactor += 0.1 * Math.min(contributor.contributions / 30, 1);
@@ -63,7 +61,7 @@ function calculateBusFactor(contributors: any[]): number {
 }
 
 // Function to calculate responsive maintainer based on contributors and last page
-function calculateResponsiveMaintainer(contributors: any[], lastPage: number): number {
+export function calculateResponsiveMaintainer(contributors: any[], lastPage: number): number {
   const contributorsFactor = Math.min(0.5, lastPage / 15);
   // Add your calculation logic here based on contributors
   return contributorsFactor;
