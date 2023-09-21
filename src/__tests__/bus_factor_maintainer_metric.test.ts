@@ -24,5 +24,37 @@ describe('bus_factor_maintainer_metric', () => {
     expect(metrics[1]).toBeLessThanOrEqual(1);  
     expect(metrics[0]).toBeGreaterThanOrEqual(0); 
     expect(metrics[1]).toBeGreaterThanOrEqual(0);
-  }); 
+  });
+  it('should return an array of 0s with invalid URL', async () => {
+    const repoURL = 'https://www.google.com';
+    const metrics = await bus_factor_maintainer_metric(repoURL);
+
+    expect(metrics).toHaveLength(2);
+    expect(metrics[0]).toBe(0);
+    expect(metrics[1]).toBe(0);
+  });
+  it('should return an array of 0s with invalid GitHub URL', async () => {
+    const repoURL = 'https://www.github.com/maxmichalec/invalid';
+    const metrics = await bus_factor_maintainer_metric(repoURL);
+
+    expect(metrics).toHaveLength(2);
+    expect(metrics[0]).toBe(0);
+    expect(metrics[1]).toBe(0);
+  });
+  it('should return an array of 0s with invalid npmjs URL', async () => {
+    const repoURL = 'https://www.npmjs.com/package/thispackagedoesnotexist';
+    const metrics = await bus_factor_maintainer_metric(repoURL);
+
+    expect(metrics).toHaveLength(2);
+    expect(metrics[0]).toBe(0);
+    expect(metrics[1]).toBe(0);
+  });
+  it('should return an array of 0s with private GitHub repository', async () => {
+    const repoURL = 'https://github.com/maxmichalec/ece264';
+    const metrics = await bus_factor_maintainer_metric(repoURL);
+
+    expect(metrics).toHaveLength(2);
+    expect(metrics[0]).toBe(0);
+    expect(metrics[1]).toBe(0);
+  });
 });
