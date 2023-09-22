@@ -4,6 +4,7 @@ import { license_ramp_up_metric } from './license_ramp_up_metric';
 import { bus_factor_maintainer_metric } from './bus_factor_maintainer_metric';
 import * as dotenv from 'dotenv';
 import * as winston from 'winston';
+import { exit } from 'process';
 
 // Function to process URL_FILE and produce NDJSON output
 export async function processUrls(urlFile: string) {
@@ -79,13 +80,26 @@ const args = process.argv.slice(2);
 // Load environment variables from .env file
 dotenv.config();
 
+if (process.env.GITHUB_TOKEN === undefined || process.env.GITHUB_TOKEN === '') {
+  exit(1);
+}
+
 let logFile: string;
 
-if (process.env.LOG_FILE === undefined) {
-  logFile = 'run.log';
+if (process.env.LOG_FILE === undefined || process.env.LOG_FILE === '') {
+  exit(1);
 } else {
   logFile = process.env.LOG_FILE;
 }
+
+// Clear LOG_FILE (exit(1) if unable to access)
+fs.access(logFile, fs.constants.F_OK, (err) => {
+  if (err) {
+    exit(1);
+  } else {
+    fs.writeFileSync(logFile, '');
+  }
+});
 
 // Configure logging to LOG_FILE
 const logger = winston.createLogger({
@@ -94,15 +108,6 @@ const logger = winston.createLogger({
   transports: [
     new winston.transports.File({ filename: logFile, level: 'info' }),
   ],
-});
-
-// Clear LOG_FILE (remove from logger transport if unable to access)
-fs.access(logFile, fs.constants.F_OK, (err) => {
-  if (err) {
-    logger.remove(winston.transports.File);
-  } else {
-    fs.writeFileSync(logFile, '');
-  }
 });
 
 export default logger;
