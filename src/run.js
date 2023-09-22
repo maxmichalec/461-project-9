@@ -120,10 +120,7 @@ function runTests(file) {
             }
         }
     }
-    var coverageText = "".concat(coveragePercentage.toFixed(2), "%");
-    console.log("Total: ".concat(totalTests));
-    console.log("Passed: ".concat(passedTests));
-    console.log("Coverage: ".concat(coverageText));
+    var coverageText = "".concat(coveragePercentage.toFixed(0), "%");
     console.log("".concat(passedTests, "/").concat(totalTests, " test cases passed. ").concat(coverageText, " line coverage achieved."));
     logger.log({ 'level': 'info', 'message': "Running tests..." });
 }

@@ -68,12 +68,8 @@ export function runTests(file: string) {
       }
     }
   }
-  const coverageText = `${coveragePercentage.toFixed(2)}%`; 
-  console.log(`Total: ${totalTests}`);
-  console.log(`Passed: ${passedTests}`); 
-  console.log(`Coverage: ${coverageText}`); 
+  const coverageText = `${coveragePercentage.toFixed(0)}%`;
   console.log(`${passedTests}/${totalTests} test cases passed. ${coverageText} line coverage achieved.`)
-
   logger.log({'level': 'info', 'message': `Running tests...`});
 }
 
