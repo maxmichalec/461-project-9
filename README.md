@@ -50,25 +50,3 @@ The logger is instantiated in the `run.ts` file using the winston logger package
 - @types/node-fetch
 
 
-jsfuzz:
-run: yourFuzzScript.js
-c8 node yourFuzzScript.js
-
-We should add documentation as we devolp.
-
-
-Needs implimeneted:
-
-const jsfuzz = require('jsfuzz');
-
-function fuzz(buffer) {
-    // Use the buffer to test your code.
-    // For instance, if you're testing a parser:
-    try {
-        myParser(buffer.toString('utf-8'));
-    } catch (e) {
-        // Handle exceptions if necessary.
-    }
-}
-
-jsfuzz(fuzz, true);

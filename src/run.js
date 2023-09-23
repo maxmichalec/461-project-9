@@ -43,6 +43,7 @@ var license_ramp_up_metric_1 = require("./license_ramp_up_metric");
 var bus_factor_maintainer_metric_1 = require("./bus_factor_maintainer_metric");
 var dotenv = require("dotenv");
 var winston = require("winston");
+var process_1 = require("process");
 // Function to process URL_FILE and produce NDJSON output
 function processUrls(urlFile) {
     return __awaiter(this, void 0, void 0, function () {
@@ -120,10 +121,7 @@ function runTests(file) {
             }
         }
     }
-    var coverageText = "".concat(coveragePercentage.toFixed(2), "%");
-    console.log("Total: ".concat(totalTests));
-    console.log("Passed: ".concat(passedTests));
-    console.log("Coverage: ".concat(coverageText));
+    var coverageText = "".concat(coveragePercentage.toFixed(0), "%");
     console.log("".concat(passedTests, "/").concat(totalTests, " test cases passed. ").concat(coverageText, " line coverage achieved."));
     logger.log({ 'level': 'info', 'message': "Running tests..." });
 }
@@ -132,13 +130,25 @@ exports.runTests = runTests;
 var args = process.argv.slice(2);
 // Load environment variables from .env file
 dotenv.config();
+if (process.env.GITHUB_TOKEN === undefined || process.env.GITHUB_TOKEN === '') {
+    (0, process_1.exit)(1);
+}
 var logFile;
-if (process.env.LOG_FILE === undefined) {
-    logFile = 'run.log';
+if (process.env.LOG_FILE === undefined || process.env.LOG_FILE === '') {
+    (0, process_1.exit)(1);
 }
 else {
     logFile = process.env.LOG_FILE;
 }
+// Clear LOG_FILE (exit(1) if unable to access)
+fs.access(logFile, fs.constants.F_OK, function (err) {
+    if (err) {
+        (0, process_1.exit)(1);
+    }
+    else {
+        fs.writeFileSync(logFile, '');
+    }
+});
 // Configure logging to LOG_FILE
 var logger = winston.createLogger({
     level: 'info',
@@ -146,15 +156,6 @@ var logger = winston.createLogger({
     transports: [
         new winston.transports.File({ filename: logFile, level: 'info' }),
     ],
-});
-// Clear LOG_FILE (remove from logger transport if unable to access)
-fs.access(logFile, fs.constants.F_OK, function (err) {
-    if (err) {
-        logger.remove(winston.transports.File);
-    }
-    else {
-        fs.writeFileSync(logFile, '');
-    }
 });
 exports.default = logger;
 if (args[0] == 'test') {
