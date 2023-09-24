@@ -95,7 +95,7 @@ if (process.env.LOG_FILE === undefined || process.env.LOG_FILE === '') {
 // Clear LOG_FILE (exit(1) if unable to access)
 fs.access(logFile, fs.constants.F_OK, (err) => {
   if (err) {
-    exit(1);
+    return;
   } else {
     fs.writeFileSync(logFile, '');
   }

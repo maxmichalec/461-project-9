@@ -143,7 +143,7 @@ else {
 // Clear LOG_FILE (exit(1) if unable to access)
 fs.access(logFile, fs.constants.F_OK, function (err) {
     if (err) {
-        (0, process_1.exit)(1);
+        return;
     }
     else {
         fs.writeFileSync(logFile, '');
