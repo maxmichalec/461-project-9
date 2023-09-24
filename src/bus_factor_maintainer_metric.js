@@ -37,7 +37,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.bus_factor_maintainer_metric = void 0;
+exports.bus_factor_maintainer_metric = exports.calcResponsiveMaintainer = exports.calcBusFactor = exports.fetchGraphQL = exports.fetchResponse = void 0;
 var run_1 = require("./run");
 var graphql_1 = require("@octokit/graphql");
 var license_ramp_up_metric_1 = require("./license_ramp_up_metric");
@@ -57,19 +57,20 @@ function fetchResponse(queryUrl) {
                 case 1:
                     response = _a.sent();
                     if (response.status !== 200) {
-                        run_1.default.log({ 'level': 'error', 'message': "Failed to fetch GitHub contributors: Response ".concat(response.status) });
+                        run_1.default.log({ 'level': 'error', 'message': "Failed to fetch GitHub REST API response: Response ".concat(response.status) });
                         return [2 /*return*/, Promise.reject(null)];
                     }
                     return [2 /*return*/, response];
                 case 2:
                     error_1 = _a.sent();
-                    run_1.default.log({ 'level': 'error', 'message': "Error fetching GitHub contributors: ".concat(error_1) });
-                    return [2 /*return*/, Promise.reject(null)];
+                    run_1.default.log({ 'level': 'error', 'message': "Error fetching GitHub REST API response: ".concat(error_1) });
+                    throw error_1;
                 case 3: return [2 /*return*/];
             }
         });
     });
 }
+exports.fetchResponse = fetchResponse;
 function fetchGraphQL(query) {
     return __awaiter(this, void 0, void 0, function () {
         var gqlRequest, error_2;
@@ -91,12 +92,13 @@ function fetchGraphQL(query) {
                 case 2:
                     error_2 = _a.sent();
                     run_1.default.log({ 'level': 'error', 'message': "Error fetching GitHub repository via GraphQL: ".concat(error_2) });
-                    return [2 /*return*/, Promise.reject(null)];
+                    throw error_2;
                 case 3: return [2 /*return*/];
             }
         });
     });
 }
+exports.fetchGraphQL = fetchGraphQL;
 function calcBusFactor(owner, repo) {
     return __awaiter(this, void 0, void 0, function () {
         var queryUrl, response, contributors, busFactor;
@@ -104,7 +106,9 @@ function calcBusFactor(owner, repo) {
             switch (_a.label) {
                 case 0:
                     queryUrl = "https://api.github.com/repos/".concat(owner, "/").concat(repo, "/contributors?per_page=10");
-                    return [4 /*yield*/, fetchResponse(queryUrl)];
+                    return [4 /*yield*/, fetchResponse(queryUrl).catch(function (error) {
+                            return null;
+                        })];
                 case 1:
                     response = _a.sent();
                     if (response === null) {
@@ -122,6 +126,7 @@ function calcBusFactor(owner, repo) {
         });
     });
 }
+exports.calcBusFactor = calcBusFactor;
 function calcResponsiveMaintainer(owner, repo) {
     return __awaiter(this, void 0, void 0, function () {
         var responsive_maintainer, queryUrl, response, header, matchResult, lastPage, query, gqlResponse;
@@ -130,7 +135,9 @@ function calcResponsiveMaintainer(owner, repo) {
                 case 0:
                     responsive_maintainer = 0;
                     queryUrl = "https://api.github.com/repos/".concat(owner, "/").concat(repo, "/contributors?per_page=1&anon=1");
-                    return [4 /*yield*/, fetchResponse(queryUrl)];
+                    return [4 /*yield*/, fetchResponse(queryUrl).catch(function (error) {
+                            return null;
+                        })];
                 case 1:
                     response = _a.sent();
                     if (response === null) {
@@ -151,9 +158,14 @@ function calcResponsiveMaintainer(owner, repo) {
                     }
                     responsive_maintainer += Math.min(0.5, lastPage / 15);
                     query = "\n    {\n      repository(owner: \"".concat(owner, "\", name: \"").concat(repo, "\") {\n        pullRequests(last: 3, orderBy: {field: CREATED_AT, direction: DESC}) {\n          nodes {\n            createdAt\n          }\n        }\n      }\n    }\n  ");
-                    return [4 /*yield*/, fetchGraphQL(query)];
+                    return [4 /*yield*/, fetchGraphQL(query).catch(function (error) {
+                            return null;
+                        })];
                 case 2:
                     gqlResponse = _a.sent();
+                    if (gqlResponse === null) {
+                        return [2 /*return*/, 0];
+                    }
                     // Iterate through (up to 5) PRs to calculate part of responsive maintainer metric
                     // Calculate number of days since each PR was created (best if within past 2 weeks)
                     gqlResponse.repository.pullRequests.nodes.forEach(function (pullRequest) {
@@ -166,6 +178,7 @@ function calcResponsiveMaintainer(owner, repo) {
         });
     });
 }
+exports.calcResponsiveMaintainer = calcResponsiveMaintainer;
 function bus_factor_maintainer_metric(repoURL) {
     return __awaiter(this, void 0, void 0, function () {
         var bus_factor, responsive_maintainer, url, sections;
@@ -186,6 +199,10 @@ function bus_factor_maintainer_metric(repoURL) {
                         run_1.default.log({ 'level': 'error', 'message': "This npmjs package is not stored in a GitHub repository." });
                         return [2 /*return*/, [0, 0]];
                     }
+                    // Get owner and repo from GitHub URL
+                    url = repoURL.replace(/^(https?:\/\/)?(www\.)?/i, '');
+                    sections = url.split('/');
+                    sections[2] = sections[2].replace(/\.git$/i, '');
                     _a.label = 2;
                 case 2:
                     // Check if the URL is a valid GitHub repository URL
@@ -193,7 +210,8 @@ function bus_factor_maintainer_metric(repoURL) {
                         run_1.default.log({ 'level': 'error', 'message': "Invalid GitHub repository URL: ".concat(repoURL) });
                         return [2 /*return*/, [0, 0]];
                     }
-                    run_1.default.log({ 'level': 'info', 'message': "GitHub repository: ".concat(repoURL) });
+                    run_1.default.log({ 'level': 'info', 'message': "GitHub URL: ".concat(repoURL) });
+                    run_1.default.log({ 'level': 'info', 'message': "GitHub owner: ".concat(sections[1], ", GitHub repo: ").concat(sections[2]) });
                     return [4 /*yield*/, calcBusFactor(sections[1], sections[2])];
                 case 3:
                     // Calculate bus factor metric

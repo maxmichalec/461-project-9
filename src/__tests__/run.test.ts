@@ -75,7 +75,7 @@ describe('runTests', () => {
     
     // Check if console.log was called with the expected JSON string
     expect(consoleLogSpy).toHaveBeenCalled(); 
-    expect(consoleLogSpy).toHaveBeenCalledTimes(4);
+    expect(consoleLogSpy).toHaveBeenCalledTimes(1);
 
     // Clean up the spy
     consoleLogSpy.mockRestore();

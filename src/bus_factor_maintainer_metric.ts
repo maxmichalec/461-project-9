@@ -4,7 +4,7 @@ import { graphql, GraphQlQueryResponseData } from '@octokit/graphql';
 import { findGitHubRepoUrl } from './license_ramp_up_metric';
 import fetch, { Response } from 'node-fetch';
 
-async function fetchResponse(queryUrl: string): Promise<Response> {
+export async function fetchResponse(queryUrl: string): Promise<Response> {
   try {
     const response = await fetch(queryUrl, {
       headers: {
@@ -13,17 +13,17 @@ async function fetchResponse(queryUrl: string): Promise<Response> {
     });
 
     if (response.status !== 200) {
-      logger.log({'level': 'error', 'message': `Failed to fetch GitHub contributors: Response ${response.status}`});
+      logger.log({'level': 'error', 'message': `Failed to fetch GitHub REST API response: Response ${response.status}`});
       return Promise.reject(null);
     }
     return response;
   } catch (error) {
-    logger.log({'level': 'error', 'message': `Error fetching GitHub contributors: ${error}`});
-    return Promise.reject(null);
+    logger.log({'level': 'error', 'message': `Error fetching GitHub REST API response: ${error}`});
+    throw error;
   }
 }
 
-async function fetchGraphQL(query: string): Promise<GraphQlQueryResponseData> {
+export async function fetchGraphQL(query: string): Promise<GraphQlQueryResponseData> {
   try {
     const gqlRequest: GraphQlQueryResponseData = await graphql(query, {
 			headers: {
@@ -37,14 +37,17 @@ async function fetchGraphQL(query: string): Promise<GraphQlQueryResponseData> {
     return gqlRequest;
   } catch (error) {
     logger.log({'level': 'error', 'message': `Error fetching GitHub repository via GraphQL: ${error}`});
-    return Promise.reject(null);
+    throw error;
   }
 }
 
-async function calcBusFactor(owner: string, repo: string): Promise<number> {
+export async function calcBusFactor(owner: string, repo: string): Promise<number> {
   // Make GitHub REST API call to get (up to 10) contributors to calculate impact for bus factor metric
   const queryUrl = `https://api.github.com/repos/${owner}/${repo}/contributors?per_page=10`;
-  const response = await fetchResponse(queryUrl);
+  const response = await fetchResponse(queryUrl).catch((error) => {
+    return null;
+  });
+  // return score of 0 if REST API call fails
   if (response === null) {
     return 0;
   }
@@ -57,12 +60,15 @@ async function calcBusFactor(owner: string, repo: string): Promise<number> {
   return busFactor;
 }
 
-async function calcResponsiveMaintainer(owner: string, repo: string): Promise<number> {
+export async function calcResponsiveMaintainer(owner: string, repo: string): Promise<number> {
   let responsive_maintainer = 0;
   // Make GitHub REST API call to get number of contributors to calculate part of responsive maintainer metric
 	// Trick: List 1 contributor per page and use rel="last" in header to get total number of contributors
   const queryUrl = `https://api.github.com/repos/${owner}/${repo}/contributors?per_page=1&anon=1`;
-  const response = await fetchResponse(queryUrl);
+  const response = await fetchResponse(queryUrl).catch((error) => {
+    return null;
+  });
+  // return score of 0 if REST API call fails
   if (response === null) {
     return 0;
   }
@@ -97,7 +103,14 @@ async function calcResponsiveMaintainer(owner: string, repo: string): Promise<nu
     }
   `;
 
-  const gqlResponse: GraphQlQueryResponseData = await fetchGraphQL(query);
+  const gqlResponse: GraphQlQueryResponseData | null = await fetchGraphQL(query).catch((error) => {
+    return null;
+  });
+  // return score of 0 if GraphQL query fails
+  if (gqlResponse === null) {
+    return 0;
+  }
+
   // Iterate through (up to 5) PRs to calculate part of responsive maintainer metric
   // Calculate number of days since each PR was created (best if within past 2 weeks)
   gqlResponse.repository.pullRequests.nodes.forEach((pullRequest: any) => {
@@ -115,8 +128,8 @@ export async function bus_factor_maintainer_metric(repoURL: string) : Promise<nu
 	let responsive_maintainer: number = 0;
 
 	// Check whether the URL is GitHub or NPMJS URL
-	const url = repoURL.replace(/^(https?:\/\/)?(www\.)?/i, '');
-	const sections = url.split('/');
+	let url = repoURL.replace(/^(https?:\/\/)?(www\.)?/i, '');
+	let sections = url.split('/');
 	if (sections[0] === 'npmjs.com') {
 		logger.log({'level': 'info', 'message': `npmjs package: ${sections[2]}`});
 		// Find the GitHub URL for the package
@@ -125,6 +138,10 @@ export async function bus_factor_maintainer_metric(repoURL: string) : Promise<nu
 			logger.log({'level': 'error', 'message': `This npmjs package is not stored in a GitHub repository.`});
 			return [0, 0];
 		}
+    // Get owner and repo from GitHub URL
+    url = repoURL.replace(/^(https?:\/\/)?(www\.)?/i, '');
+    sections = url.split('/');
+    sections[2] = sections[2].replace(/\.git$/i, '');
 	}
 
 	// Check if the URL is a valid GitHub repository URL
@@ -133,7 +150,8 @@ export async function bus_factor_maintainer_metric(repoURL: string) : Promise<nu
 		return [0, 0];
 	}
 
-	logger.log({'level': 'info', 'message': `GitHub repository: ${repoURL}`});
+	logger.log({'level': 'info', 'message': `GitHub URL: ${repoURL}`});
+  logger.log({'level': 'info', 'message': `GitHub owner: ${sections[1]}, GitHub repo: ${sections[2]}`});
 
 	// Calculate bus factor metric
   bus_factor = await calcBusFactor(sections[1], sections[2]);

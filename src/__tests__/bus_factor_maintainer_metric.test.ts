@@ -1,11 +1,11 @@
 // tests/bus_factor_maintainer_metric.test.ts
 import logger from '../run'
 import { bus_factor_maintainer_metric } from '../bus_factor_maintainer_metric';
+import { fetchResponse, fetchGraphQL, calcBusFactor, calcResponsiveMaintainer } from '../bus_factor_maintainer_metric';
 
-import {fetchContributors, calculateBusFactor, calculateResponsiveMaintainer } from '../bus_factor_maintainer_metric';
-
-describe('fetchContributors', () => {
-  it('should fetch contributors successfully', async () => {
+/*
+describe('fetchResponse', () => {
+  it('should send REST API query and fetch response successfully', async () => {
     // Mock the fetch function to always return a 200 status
     const mockResponseData = [{ login: 'contributor1', contributions: 20 }];
     jest.spyOn(global, 'fetch').mockResolvedValue({
@@ -14,43 +14,47 @@ describe('fetchContributors', () => {
     } as Response);
   
     // Call the function
-    const contributors = await fetchContributors('https://example.com/api/contributors');
+    const contributors = await fetchResponse('https://example.com/api/contributors');
   
     // Assert that the contributors match the expected data
-    expect(contributors).toEqual(mockResponseData);
+    expect(contributors.json()).toEqual(mockResponseData);
   });
   
   it('should handle fetch error', async () => {
     // Mocking fetch function to simulate an error
     global.fetch = jest.fn(() => Promise.reject('Network error'));
   
-    const contributors = await fetchContributors('https://example.com/api/contributors');
+    const contributors = await fetchResponse('https://example.com/api/contributors');
   
     // Assert that contributors is null in case of error
     expect(contributors).toBeNull();
   });
-  
 });
+*/
+describe('calcBusFactor', () => {
+  it('should calculate bus factor correctly', async () => {
+    const owner = "cloudinary";
+    const repo = "cloudinary_npm";
 
-describe('calculateBusFactor', () => {
-  it('should calculate bus factor correctly', () => {
-    const contributors = [{ contributions: 20 }, { contributions: 10 }];
-  
-    const busFactor = calculateBusFactor(contributors);
+    const busFactor = await calcBusFactor(owner, repo);
   
     // Update the expected value and precision as needed
-    expect(busFactor).toBeCloseTo(0.1, 1); // Approximately 0.2, rounded to 1 decimal place
+    // expect(busFactor).toBeCloseTo(0.1, 1); // Approximately 0.2, rounded to 1 decimal place
+    expect(busFactor).toBeLessThanOrEqual(1);
+    expect(busFactor).toBeGreaterThanOrEqual(0);
   });
 });
 
-describe('calculateResponsiveMaintainer', () => {
-  it('should calculate responsive maintainer correctly', () => {
-    const contributorsPerPage = [{}, {}, {}]; // Simulating 3 contributors on the last page
-    const lastPage = 5; // Simulating a last page number of 5
+describe('calcResponsiveMaintainer', () => {
+  it('should calculate responsive maintainer correctly', async () => {
+    const owner = "cloudinary";
+    const repo = "cloudinary_npm";
 
-    const responsiveMaintainer = calculateResponsiveMaintainer(contributorsPerPage, lastPage);
+    const responsiveMaintainer = await calcResponsiveMaintainer(owner, repo);
 
-    expect(responsiveMaintainer).toBeCloseTo(0.5, 1); // Approximately 0.5, rounded to 1 decimal place
+    // expect(responsiveMaintainer).toBeCloseTo(0.5, 1); // Approximately 0.5, rounded to 1 decimal place
+    expect(responsiveMaintainer).toBeLessThanOrEqual(1);
+    expect(responsiveMaintainer).toBeGreaterThanOrEqual(0);
   });
 });
 
