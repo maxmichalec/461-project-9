@@ -28,15 +28,20 @@ The logger is instantiated in the `run.ts` file using the winston logger package
 
 **Packages:**
 - fs
-- fs-extra
-- isomorphic-git
-- typescript
-- @types/node
-- axios
-- tmp
-- jest
-- eslint
-- @typescript-eslint/parser
+- fs-extra - https://www.npmjs.com/package/fs-extra
+- isomorphic-git - https://www.npmjs.com/package/isomorphic-git
+- typescript - https://www.npmjs.com/package/typescript
+- @types/node - https://www.npmjs.com/package/@types/node
+- axios - https://www.npmjs.com/package/axios
+    Dep - follow-redirects, form-data, proxy-from-env
+- tmp - https://www.npmjs.com/package/tmp
+    Dep - rimraf
+- jest - https://www.npmjs.com/package/jest
+    Dep - @jest/core, @jest/types, import-local, jest-cli
+- eslint - https://www.npmjs.com/package/eslint
+    Dep - @eslint-community/eslint-utils, @eslint-community/regexpp, @eslint/eslintrc, @eslint/js, @humanwhocodes/config-array, @humanwhocodes/module-importer, @nodelib/fs.walk, ajv, chalk, cross-spawn, debug, doctrin, eescape-string-regexp, eslint-scope, eslint-visitor-keys, espree, esquery, esutils, fast-deep-equal, file-entry-cache, find-up, glob-parent, globals, graphemer, ignore, imurmurhash, is-glob, is-path-inside, js-yaml, json-stable-stringify-without-jsonify, levn, lodash.merge, minimatch, natural-compare, optionator, strip-ansi, text-table
+- @typescript-eslint/parser - https://www.npmjs.com/package/@typescript-eslint/parser
+    Dep - @typescript-eslint/scope-manager, @typescript-eslint/types, @typescript-eslint/typescript-estree, @typescript-eslint/visitor-keys, debug
 - @typescript-eslint/eslint-plugin
 - node-fetch
 - @octokit/graphql
