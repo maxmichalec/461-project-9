@@ -5,6 +5,8 @@ Names:
 - Maxwell Michalec
 - Caroline Gilbert
 
+Overview: 
+
 **Commnad Line Interface:**
 The command line interface can be found within the `run` and `run.ts` files.  The `run` file is in the main directory and is a bash script file.  The file looks to see what was entered by the user.  If user wants the npm modules to be installed then it will do that.  If the user doesn't want the modules to be installed, then the code will be compiled and ran with the user input.  This runs the `run.ts` file where either a file with URLs is entered or tests need to be ran.  The `run.ts` file will call all the other functions for the metric caluclations and output the needed data.  
 
@@ -42,16 +44,25 @@ The logger is instantiated in the `run.ts` file using the winston logger package
     Dep - @eslint-community/eslint-utils, @eslint-community/regexpp, @eslint/eslintrc, @eslint/js, @humanwhocodes/config-array, @humanwhocodes/module-importer, @nodelib/fs.walk, ajv, chalk, cross-spawn, debug, doctrin, eescape-string-regexp, eslint-scope, eslint-visitor-keys, espree, esquery, esutils, fast-deep-equal, file-entry-cache, find-up, glob-parent, globals, graphemer, ignore, imurmurhash, is-glob, is-path-inside, js-yaml, json-stable-stringify-without-jsonify, levn, lodash.merge, minimatch, natural-compare, optionator, strip-ansi, text-table
 - @typescript-eslint/parser - https://www.npmjs.com/package/@typescript-eslint/parser
     Dep - @typescript-eslint/scope-manager, @typescript-eslint/types, @typescript-eslint/typescript-estree, @typescript-eslint/visitor-keys, debug
-- @typescript-eslint/eslint-plugin
-- node-fetch
-- @octokit/graphql
-- dotenv
-- winston
-- @types/jest
-- ts-jest
-- istanbul-lib-coverage
-- istanbul-reports
-- nyc
-- @types/node-fetch
+- @typescript-eslint/eslint-plugin - https://www.npmjs.com/package/@typescript-eslint/eslint-plugin
+    Dep - @eslint-community/regexp, @typescript-eslint/scope-manager, @typescript-eslint/type-utils, @typescript-eslint/utils@, typescript-eslint/visitor-keys, debug, graphemer, ignore, natural-compare, semver, ts-api-utils
+- node-fetch - https://www.npmjs.com/package/node-fetch
+    Dep - data-uri-to-buffer, fetch-blob, formdata-polyfill
+- @octokit/graphql - https://www.npmjs.com/package/@octokit/graphql
+    Dep - @octokit/request, @octokit/types, universal-user-agent
+- dotenv - https://www.npmjs.com/package/dotenv
+- winston - https://www.npmjs.com/package/winston
+    Dep - @dabh/diagnostics, @colors/colors, async, is-stream, logform, one-time, readable-stream, safe-stable-stringify, stack-trace, triple-beam, winston-transport
+- @types/jest - https://www.npmjs.com/package/@types/jest
+    Dep - expect, pretty-format
+- ts-jest - https://www.npmjs.com/package/ts-jest
+    Dep - bs-logger, fast-json-stable-stringify, jest-util, json5, lodash.memoize, make-error, semver, yargs-parser
+- istanbul-lib-coverage - https://www.npmjs.com/package/istanbul-lib-coverage
+- istanbul-reports - https://www.npmjs.com/package/istanbul-reports
+    Dep - html-escaper, istanbul-lib-report
+- nyc - https://www.npmjs.com/package/nyc
+    Dep - @istanbuljs/load-nyc-config, @istanbuljs/schema, caching-transform, convert-source-map, decamelize, find-cache-dir, find-up, foreground-child, get-package-type, glob, istanbul-lib-coverage, istanbul-lib-hook, istanbul-lib-instrument, istanbul-lib-processinfo, istanbul-lib-report, istanbul-lib-source-maps, istanbul-reports, make-dir, node-preload, p-map, process-on-spawn, resolve-from, rimraf, signal-exit, spawn-wra, test-exclude, yargs
+- @types/node-fetch - https://www.npmjs.com/package/@types/node-fetch
+    Dep - @types/node, form-data
 
 
