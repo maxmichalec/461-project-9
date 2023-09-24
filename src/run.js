@@ -140,15 +140,15 @@ if (process.env.LOG_FILE === undefined || process.env.LOG_FILE === '') {
 else {
     logFile = process.env.LOG_FILE;
 }
+fs.writeFileSync(logFile, '', { flag: 'w' });
 // Clear LOG_FILE (exit(1) if unable to access)
-fs.access(logFile, fs.constants.F_OK, function (err) {
-    if (err) {
-        return;
-    }
-    else {
-        fs.writeFileSync(logFile, '');
-    }
-});
+// fs.access(logFile, fs.constants.F_OK, (err) => {
+//   if (err) {
+//     return;
+//   } else {
+//     fs.writeFileSync(logFile, '');
+//   }
+// });
 // Configure logging to LOG_FILE
 var logger = winston.createLogger({
     level: 'info',
