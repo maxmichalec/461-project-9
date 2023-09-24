@@ -4,7 +4,4 @@
 node_modules/**
 .DS_Store
 coverage/**
-checker.py
-helper.py
-one-url.py
 __pycache__/**
