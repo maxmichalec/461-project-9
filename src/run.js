@@ -140,22 +140,36 @@ if (process.env.LOG_FILE === undefined || process.env.LOG_FILE === '') {
 else {
     logFile = process.env.LOG_FILE;
 }
-fs.writeFileSync(logFile, '', { flag: 'w' });
-// Clear LOG_FILE (exit(1) if unable to access)
-// fs.access(logFile, fs.constants.F_OK, (err) => {
-//   if (err) {
-//     return;
-//   } else {
-//     fs.writeFileSync(logFile, '');
-//   }
-// });
+var logLevel = '';
+// Set logging level based on LOG_LEVEL environment variable
+if (process.env.LOG_LEVEL !== undefined && process.env.LOG_LEVEL !== '') {
+    if (process.env.LOG_LEVEL === '0') {
+        logLevel = '';
+    }
+    else if (process.env.LOG_LEVEL === '1') {
+        logLevel = 'error';
+    }
+    else if (process.env.LOG_LEVEL === '2') {
+        logLevel = 'info';
+    }
+}
 // Configure logging to LOG_FILE
 var logger = winston.createLogger({
     level: 'info',
     format: winston.format.simple(),
     transports: [
-        new winston.transports.File({ filename: logFile, level: 'info' }),
+        new winston.transports.File({ filename: logFile, level: logLevel }),
     ],
+});
+fs.access(logFile, fs.constants.F_OK, function (err) {
+    if (err) {
+        // If unable to access, remove file transport
+        logger.remove(winston.transports.File);
+    }
+    else {
+        // Clear LOG_FILE, open with write permissions if it doesn't exist
+        fs.writeFileSync(logFile, '', { flag: 'w' });
+    }
 });
 exports.default = logger;
 if (args[0] == 'test') {
