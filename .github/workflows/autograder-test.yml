@@ -1,6 +1,6 @@
-name: jest-unit-test
-run-name: ${{ github.actor }} is running a unit test with jest
-on: [workflow_dispatch]
+name: autograder-test
+run-name: ${{ github.actor }} is running the autograder
+on: [push]
 jobs:
   run-install-test:
     runs-on: ubuntu-latest
@@ -8,14 +8,11 @@ jobs:
       - run: echo "The job was automatically triggered by a ${{ github.event_name }} event."
       - run: echo "The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
 
-      - name: Checkout Code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
       
-      - name: Install Dependencies
-        run: ./run install
-
-      - name: Run Tests
-        run: ./run test
+      - run: python3 checker.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Job Status
         run: echo "This job's status is ${{ job.status }}."
