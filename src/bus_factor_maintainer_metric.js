@@ -58,7 +58,7 @@ function fetchResponse(queryUrl) {
                     response = _a.sent();
                     if (response.status !== 200) {
                         run_1.default.log({ 'level': 'error', 'message': "Failed to fetch GitHub REST API response: Response ".concat(response.status) });
-                        return [2 /*return*/, Promise.reject(null)];
+                        throw new Error("Failed to fetch GitHub REST API response: Response ".concat(response.status));
                     }
                     return [2 /*return*/, response];
                 case 2:
@@ -111,6 +111,7 @@ function calcBusFactor(owner, repo) {
                         })];
                 case 1:
                     response = _a.sent();
+                    // return score of 0 if REST API call fails
                     if (response === null) {
                         return [2 /*return*/, 0];
                     }
@@ -140,6 +141,7 @@ function calcResponsiveMaintainer(owner, repo) {
                         })];
                 case 1:
                     response = _a.sent();
+                    // return score of 0 if REST API call fails
                     if (response === null) {
                         return [2 /*return*/, 0];
                     }
@@ -163,6 +165,7 @@ function calcResponsiveMaintainer(owner, repo) {
                         })];
                 case 2:
                     gqlResponse = _a.sent();
+                    // return score of 0 if GraphQL query fails
                     if (gqlResponse === null) {
                         return [2 /*return*/, 0];
                     }

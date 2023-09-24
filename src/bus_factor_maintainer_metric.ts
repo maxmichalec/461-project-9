@@ -3,6 +3,7 @@ import logger from './run'
 import { graphql, GraphQlQueryResponseData } from '@octokit/graphql';
 import { findGitHubRepoUrl } from './license_ramp_up_metric';
 import fetch, { Response } from 'node-fetch';
+import { error } from 'console';
 
 export async function fetchResponse(queryUrl: string): Promise<Response> {
   try {
@@ -14,7 +15,7 @@ export async function fetchResponse(queryUrl: string): Promise<Response> {
 
     if (response.status !== 200) {
       logger.log({'level': 'error', 'message': `Failed to fetch GitHub REST API response: Response ${response.status}`});
-      return Promise.reject(null);
+      throw new Error(`Failed to fetch GitHub REST API response: Response ${response.status}`);
     }
     return response;
   } catch (error) {
