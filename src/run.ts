@@ -110,16 +110,17 @@ const logger = winston.createLogger({
   level: 'info',
   format: winston.format.simple(),
   transports: [
-    // new winston.transports.File({ filename: logFile, level: logLevel }),
+    // default log file
+    new winston.transports.File({ filename: 'run.log', level: logLevel }),
   ],
 });
 
 fs.access(logFile, fs.constants.W_OK, (err) => {
   if (err) {
     // If unable to access, log to a default file
-    logger.add(new winston.transports.File({ filename: 'run.log', level: logLevel }));
     fs.writeFileSync('run.log', '', { flag: 'w' });
   } else {
+    logger.remove(new winston.transports.File({ filename: 'run.log', level: logLevel }));
     // Clear LOG_FILE, open with write permissions if it doesn't exist
     logger.add(new winston.transports.File({ filename: logFile, level: logLevel }));
     fs.writeFileSync(logFile, '', { flag: 'w' });

@@ -13,11 +13,13 @@ export async function fetchResponse(queryUrl: string): Promise<Response> {
     });
 
     if (response.status !== 200) {
+      logger.log({'level': 'error', 'message': `For API query ${queryUrl}`});
       logger.log({'level': 'error', 'message': `Failed to fetch GitHub REST API response: Response ${response.status}`});
       throw new Error(`Failed to fetch GitHub REST API response: Response ${response.status}`);
     }
     return response;
   } catch (error) {
+    logger.log({'level': 'error', 'message': `For API query ${queryUrl}`});
     logger.log({'level': 'error', 'message': `Error fetching GitHub REST API response: ${error}`});
     throw error;
   }
@@ -54,10 +56,44 @@ export async function calcBusFactor(owner: string, repo: string): Promise<number
 
   let contributors = await response.json();
   let busFactor = 0;
+  // Calculate impact for each contributor
   contributors.forEach((contributor: any) => {
-    busFactor += 0.1 * Math.min(contributor.contributions / 30, 1);
+    let impact = 0;
+    // Add number of commits by contributor to impact
+    impact += 0.6 * Math.min(contributor.contributions / 20, 1);
+
+    // make API call to get number of pull requests created by contributor
+    let prQueryUrl = `https://api.github.com/search/issues?q=author:${contributor.login}+type:pr+repo:${owner}/${repo}`;
+    fetchResponse(prQueryUrl).then((response) => {
+      if (response !== null) {
+        response.json().then((data) => {
+          impact += 0.25 * Math.min(data.total_count / 5, 1);
+        });
+      }
+    })
+    .catch((error) => {
+      logger.log({'level': 'error', 'message': `Error fetching GitHub REST API response for number of PRs from ${contributor.login}: ${error}`});
+    });
+
+    // make API call to get number of code reviews by contributor
+    const crQueryUrl = `https://api.github.com/search/issues?q=review-requested:${contributor.login}+type:pr+repo:${owner}/${repo}`;
+    fetchResponse(crQueryUrl).then((response) => {
+      if (response !== null) {
+        response.json().then((data) => {
+          impact += 0.15 * Math.min(data.total_count / 5, 1);
+        });
+      }
+    })
+    .catch((error) => {
+      logger.log({'level': 'error', 'message': `Error fetching GitHub REST API response for number of code reviews from ${contributor.login}: ${error}`});
+    });
+
+    // Add impact to bus factor
+    busFactor += impact * 0.1;
   });
-  return busFactor;
+
+  // Ensure bus factor is between 0 and 1
+  return Math.min(busFactor, 1);
 }
 
 export async function calcResponsiveMaintainer(owner: string, repo: string): Promise<number> {

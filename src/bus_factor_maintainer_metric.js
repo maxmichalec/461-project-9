@@ -57,12 +57,14 @@ function fetchResponse(queryUrl) {
                 case 1:
                     response = _a.sent();
                     if (response.status !== 200) {
+                        run_1.default.log({ 'level': 'error', 'message': "For API query ".concat(queryUrl) });
                         run_1.default.log({ 'level': 'error', 'message': "Failed to fetch GitHub REST API response: Response ".concat(response.status) });
                         throw new Error("Failed to fetch GitHub REST API response: Response ".concat(response.status));
                     }
                     return [2 /*return*/, response];
                 case 2:
                     error_1 = _a.sent();
+                    run_1.default.log({ 'level': 'error', 'message': "For API query ".concat(queryUrl) });
                     run_1.default.log({ 'level': 'error', 'message': "Error fetching GitHub REST API response: ".concat(error_1) });
                     throw error_1;
                 case 3: return [2 /*return*/];
@@ -119,10 +121,40 @@ function calcBusFactor(owner, repo) {
                 case 2:
                     contributors = _a.sent();
                     busFactor = 0;
+                    // Calculate impact for each contributor
                     contributors.forEach(function (contributor) {
-                        busFactor += 0.1 * Math.min(contributor.contributions / 30, 1);
+                        var impact = 0;
+                        // Add number of commits by contributor to impact
+                        impact += 0.6 * Math.min(contributor.contributions / 20, 1);
+                        // make API call to get number of pull requests created by contributor
+                        var prQueryUrl = "https://api.github.com/search/issues?q=author:".concat(contributor.login, "+type:pr+repo:").concat(owner, "/").concat(repo);
+                        fetchResponse(prQueryUrl).then(function (response) {
+                            if (response !== null) {
+                                response.json().then(function (data) {
+                                    impact += 0.25 * Math.min(data.total_count / 5, 1);
+                                });
+                            }
+                        })
+                            .catch(function (error) {
+                            run_1.default.log({ 'level': 'error', 'message': "Error fetching GitHub REST API response for number of PRs from ".concat(contributor.login, ": ").concat(error) });
+                        });
+                        // make API call to get number of code reviews by contributor
+                        var crQueryUrl = "https://api.github.com/search/issues?q=review-requested:".concat(contributor.login, "+type:pr+repo:").concat(owner, "/").concat(repo);
+                        fetchResponse(crQueryUrl).then(function (response) {
+                            if (response !== null) {
+                                response.json().then(function (data) {
+                                    impact += 0.15 * Math.min(data.total_count / 5, 1);
+                                });
+                            }
+                        })
+                            .catch(function (error) {
+                            run_1.default.log({ 'level': 'error', 'message': "Error fetching GitHub REST API response for number of code reviews from ".concat(contributor.login, ": ").concat(error) });
+                        });
+                        // Add impact to bus factor
+                        busFactor += impact * 0.1;
                     });
-                    return [2 /*return*/, busFactor];
+                    // Ensure bus factor is between 0 and 1
+                    return [2 /*return*/, Math.min(busFactor, 1)];
             }
         });
     });
