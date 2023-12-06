@@ -1,21 +1,21 @@
 #!/bin/bash
 
-if [ "$1" == "install" ]; then 
-    #npm install message 
+if [ "$1" == "install" ]; then
+    #npm install message
     packages=("fs" "fs-extra" "isomorphic-git" "typescript" "@types/node" "axios" "tmp" "jest" "eslint" "@typescript-eslint/parser" "@typescript-eslint/eslint-plugin" "node-fetch@2" "@octokit/graphql" "dotenv" "winston" "@types/jest" "ts-jest" "istanbul-lib-coverage" "istanbul-reports" "nyc" "@types/node-fetch")
     installed_packages=0
-    for package in "${packages[@]}"; do 
+    for package in "${packages[@]}"; do
         if npm install "$package" > "mylog.txt" 2>&1; then
             installed_packages=$((installed_packages + 1))
         fi
-    done 
+    done
 
     echo "$installed_packages dependencies installed..."
 elif [ "$1" == "test" ]; then
     npx jest --coverage > "jest.log.txt" 2>&1
-    tsc src/run.ts
+    npx tsc src/run.ts
     node src/run.js "$@"
 else
-    tsc src/run.ts
+    npx tsc src/run.ts
     node src/run.js "$@"
 fi
