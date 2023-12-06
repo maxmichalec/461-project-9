@@ -76,9 +76,12 @@ function processUrls(urlFile) {
                     bf_rm_metric_array = _a.sent();
                     logger.log({ 'level': 'info', 'message': "The bus factor metric is ".concat(bf_rm_metric_array[0]) });
                     logger.log({ 'level': 'info', 'message': "The responsive maintainer metric is ".concat(bf_rm_metric_array[1]) });
+                    logger.log({ 'level': 'info', 'message': "The dependency metric is ".concat(bf_rm_metric_array[2]) });
+                    logger.log({ 'level': 'info', 'message': "The code_review metric is ".concat(bf_rm_metric_array[3]) });
                     // Calculate net score: (0.35 * correctness + 0.25 * maintainer + 0.2 * bus factor + 0.2 * ramp up) * license
                     net_score = (0.35 * l_r_metric_array[2] + 0.25 * bf_rm_metric_array[1] + 0.2 * bf_rm_metric_array[0] + 0.2 * l_r_metric_array[1]) * l_r_metric_array[0];
                     console.log("{\"URL\":\"".concat(url, "\", \"NET_SCORE\":").concat(net_score.toFixed(5), ", \"RAMP_UP_SCORE\":").concat(l_r_metric_array[1].toFixed(5), ", \"CORRECTNESS_SCORE\":").concat(l_r_metric_array[2].toFixed(5), ", \"BUS_FACTOR_SCORE\":").concat(bf_rm_metric_array[0].toFixed(5), ", \"RESPONSIVE_MAINTAINER_SCORE\":").concat(bf_rm_metric_array[1].toFixed(5), ", \"LICENSE_SCORE\":").concat(l_r_metric_array[0].toFixed(5), "}"));
+                    console.log("NEW METRIC! Dependencies-score: ".concat(bf_rm_metric_array[2], ", CodeReview-score: ").concat(bf_rm_metric_array[3], "\n"));
                     _a.label = 4;
                 case 4:
                     _i++;

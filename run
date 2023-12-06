@@ -2,7 +2,8 @@
 
 if [ "$1" == "install" ]; then
     #npm install message
-    packages=("fs" "fs-extra" "isomorphic-git" "typescript" "@types/node" "axios" "tmp" "jest" "eslint" "@typescript-eslint/parser" "@typescript-eslint/eslint-plugin" "node-fetch@2" "@octokit/graphql" "dotenv" "winston" "@types/jest" "ts-jest" "istanbul-lib-coverage" "istanbul-reports" "nyc" "@types/node-fetch")
+    packages=("fs" "fs-extra" "isomorphic-git" "typescript" "@types/node" "axios" "tmp" "jest" "eslint" "@typescript-eslint/parser" "@typescript-eslint/eslint-plugin" "node-fetch@2" "@octokit/graphql" "dotenv" "winston" "@types/jest" "ts-jest" "istanbul-lib-coverage" "istanbul-reports" "nyc" "@types/node-fetch" "@octokit/rest")
+
     installed_packages=0
     for package in "${packages[@]}"; do
         if npm install "$package" > "mylog.txt" 2>&1; then

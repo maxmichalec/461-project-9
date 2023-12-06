@@ -158,10 +158,138 @@ export async function calcResponsiveMaintainer(owner: string, repo: string): Pro
   return responsive_maintainer;
 }
 
+/* Added by Luke */
+// Additional imports if needed
+import { Octokit } from "@octokit/rest"; // Added this to ./run install script
+interface FileContentResponse {
+    type: string;
+    encoding?: string;
+    content?: string;
+    size?: number;
+    name?: string;
+    path?: string;
+}
+// Fetch package.json from the GitHub repository
+async function fetchPackageJson(owner: string, repo: string): Promise<any> {
+    const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+    try {
+        const response = await octokit.repos.getContent({
+            owner: owner,
+            repo: repo,
+            path: 'package.json',
+        });
+        // Check if the response data is of the expected type
+        const data = response.data as FileContentResponse;
+        if ('type' in data && data.type === 'file' && 'content' in data) {
+          const content = Buffer.from(data.content, 'base64').toString();
+          return JSON.parse(content);
+        }
+    } catch (error) {
+        logger.log({'level': 'error', 'message': `Error fetching package.json: ${error}`});
+        return null;
+    }
+}
+
+// Calculate the dependencies metric
+async function calcDependenciesMetric(owner: string, repo: string): Promise<number> {
+    const packageJson = await fetchPackageJson(owner, repo);
+    if (!packageJson) return 0; // Return 0 if package.json is not found
+
+    const dependencies = {...packageJson.dependencies, ...packageJson.devDependencies};
+    if (Object.keys(dependencies).length === 0) return 1.0; // Return 1.0 if no dependencies
+
+    let pinnedDependencies = 0;
+    Object.values(dependencies).forEach((version: string) => {
+        if (version.match(/^\d+\.\d+\./)) { // Regex to check if version is pinned to major.minor
+            pinnedDependencies++;
+        }
+    });
+
+    return pinnedDependencies / Object.keys(dependencies).length;
+}
+
+// Function to fetch pull requests from the GitHub repository
+async function fetchPullRequests(owner: string, repo: string, octokit: Octokit): Promise<any[]> {
+    try {
+        const prs = await octokit.paginate(octokit.pulls.list, {
+            owner: owner,
+            repo: repo,
+            state: 'closed',  // considering only merged/closed PRs
+            per_page: 100
+        });
+        return prs;
+    } catch (error) {
+        logger.log({'level': 'error', 'message': `Error fetching pull requests: ${error}`});
+        return [];
+    }
+}
+
+// Function to calculate the codeReview metric
+async function calcCodeReviewMetric(owner: string, repo: string): Promise<number> {
+    const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+    let pullRequests;
+
+    try { // Getting all pull requests
+        pullRequests = await fetchPullRequests(owner, repo, octokit);
+    } catch (error) {
+        logger.log({'level': 'error', 'message': `Error fetching pull requests: ${error}`});
+        return 0;
+    }
+
+    if (!pullRequests || pullRequests.length === 0) {
+        logger.log({'level': 'info', 'message': 'No pull requests found or error in fetching.'});
+        return 0;
+    }
+
+    const prData = pullRequests.map(pr => ({
+        number: pr.number,
+        additions: pr.additions,
+        deletions: pr.deletions
+    }));
+
+    let totalCodeChanges = 0;
+    let reviewedCodeChanges = 0;
+
+    for (const pr of prData) {
+        try {
+            const reviews = await octokit.pulls.listReviews({
+                owner: owner,
+                repo: repo,
+                pull_number: pr.number
+            });
+
+            const info = await octokit.pulls.get({
+                owner: owner,
+                repo: repo,
+                pull_number: pr.number
+            })
+
+            totalCodeChanges += info.data.additions + info.data.deletions;
+
+            if (reviews.data.length > 0) {
+                reviewedCodeChanges += info.data.additions + info.data.deletions;
+            }
+        } catch (error) {
+            logger.log({'level': 'error', 'message': `Error processing PR #${pr.number}: ${error}`});
+        }
+    }
+
+    if (totalCodeChanges === 0) {
+        logger.log({'level': 'info', 'message': 'Total code changes are zero.'});
+        return 0; // Avoid division by zero
+    }
+
+    return reviewedCodeChanges / totalCodeChanges;
+}
+/* End added by Luke */
+
+
 export async function bus_factor_maintainer_metric(repoURL: string) : Promise<number[]> {
 	// Metrics to be calculated
 	let bus_factor: number = 0;
 	let responsive_maintainer: number = 0;
+    let dependencies: number = 0; // Added by Luke
+    let code_review: number = 0; // Added by Luke
 
 	// Check whether the URL is GitHub or NPMJS URL
 	let url = repoURL.replace(/^(https?:\/\/)?(www\.)?/i, '');
@@ -195,5 +323,11 @@ export async function bus_factor_maintainer_metric(repoURL: string) : Promise<nu
   // Calculate responsive maintainer metric
   responsive_maintainer = await calcResponsiveMaintainer(sections[1], sections[2]);
 
-	return [bus_factor, responsive_maintainer];
+  // Calculate dependencies metric Added by Luke.
+    dependencies = await calcDependenciesMetric(sections[1], sections[2]);
+
+    // Calculate code review metric. Added by Luke.
+    code_review = await calcCodeReviewMetric(sections[1], sections[2]);
+
+	return [bus_factor, responsive_maintainer, dependencies, code_review]; // Modified by Luke.
 }

@@ -1,5 +1,16 @@
 #!/usr/bin/env node
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -214,14 +225,179 @@ function calcResponsiveMaintainer(owner, repo) {
     });
 }
 exports.calcResponsiveMaintainer = calcResponsiveMaintainer;
+/* Added by Luke */
+// Additional imports if needed
+var rest_1 = require("@octokit/rest"); // Added this to ./run install script
+// Fetch package.json from the GitHub repository
+function fetchPackageJson(owner, repo) {
+    return __awaiter(this, void 0, void 0, function () {
+        var octokit, response, data, content, error_3;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    octokit = new rest_1.Octokit({ auth: process.env.GITHUB_TOKEN });
+                    _a.label = 1;
+                case 1:
+                    _a.trys.push([1, 3, , 4]);
+                    return [4 /*yield*/, octokit.repos.getContent({
+                            owner: owner,
+                            repo: repo,
+                            path: 'package.json',
+                        })];
+                case 2:
+                    response = _a.sent();
+                    data = response.data;
+                    if ('type' in data && data.type === 'file' && 'content' in data) {
+                        content = Buffer.from(data.content, 'base64').toString();
+                        return [2 /*return*/, JSON.parse(content)];
+                    }
+                    return [3 /*break*/, 4];
+                case 3:
+                    error_3 = _a.sent();
+                    run_1.default.log({ 'level': 'error', 'message': "Error fetching package.json: ".concat(error_3) });
+                    return [2 /*return*/, null];
+                case 4: return [2 /*return*/];
+            }
+        });
+    });
+}
+// Calculate the dependencies metric
+function calcDependenciesMetric(owner, repo) {
+    return __awaiter(this, void 0, void 0, function () {
+        var packageJson, dependencies, pinnedDependencies;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, fetchPackageJson(owner, repo)];
+                case 1:
+                    packageJson = _a.sent();
+                    if (!packageJson)
+                        return [2 /*return*/, 0]; // Return 0 if package.json is not found
+                    dependencies = __assign(__assign({}, packageJson.dependencies), packageJson.devDependencies);
+                    if (Object.keys(dependencies).length === 0)
+                        return [2 /*return*/, 1.0]; // Return 1.0 if no dependencies
+                    pinnedDependencies = 0;
+                    Object.values(dependencies).forEach(function (version) {
+                        if (version.match(/^\d+\.\d+\./)) { // Regex to check if version is pinned to major.minor
+                            pinnedDependencies++;
+                        }
+                    });
+                    return [2 /*return*/, pinnedDependencies / Object.keys(dependencies).length];
+            }
+        });
+    });
+}
+// Function to fetch pull requests from the GitHub repository
+function fetchPullRequests(owner, repo, octokit) {
+    return __awaiter(this, void 0, void 0, function () {
+        var prs, error_4;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 2, , 3]);
+                    return [4 /*yield*/, octokit.paginate(octokit.pulls.list, {
+                            owner: owner,
+                            repo: repo,
+                            state: 'closed', // considering only merged/closed PRs
+                            per_page: 100
+                        })];
+                case 1:
+                    prs = _a.sent();
+                    return [2 /*return*/, prs];
+                case 2:
+                    error_4 = _a.sent();
+                    run_1.default.log({ 'level': 'error', 'message': "Error fetching pull requests: ".concat(error_4) });
+                    return [2 /*return*/, []];
+                case 3: return [2 /*return*/];
+            }
+        });
+    });
+}
+// Function to calculate the codeReview metric
+function calcCodeReviewMetric(owner, repo) {
+    return __awaiter(this, void 0, void 0, function () {
+        var octokit, pullRequests, error_5, prData, totalCodeChanges, reviewedCodeChanges, _i, prData_1, pr, reviews, info, error_6;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    octokit = new rest_1.Octokit({ auth: process.env.GITHUB_TOKEN });
+                    _a.label = 1;
+                case 1:
+                    _a.trys.push([1, 3, , 4]);
+                    return [4 /*yield*/, fetchPullRequests(owner, repo, octokit)];
+                case 2:
+                    pullRequests = _a.sent();
+                    return [3 /*break*/, 4];
+                case 3:
+                    error_5 = _a.sent();
+                    run_1.default.log({ 'level': 'error', 'message': "Error fetching pull requests: ".concat(error_5) });
+                    return [2 /*return*/, 0];
+                case 4:
+                    if (!pullRequests || pullRequests.length === 0) {
+                        run_1.default.log({ 'level': 'info', 'message': 'No pull requests found or error in fetching.' });
+                        return [2 /*return*/, 0];
+                    }
+                    prData = pullRequests.map(function (pr) { return ({
+                        number: pr.number,
+                        additions: pr.additions,
+                        deletions: pr.deletions
+                    }); });
+                    totalCodeChanges = 0;
+                    reviewedCodeChanges = 0;
+                    _i = 0, prData_1 = prData;
+                    _a.label = 5;
+                case 5:
+                    if (!(_i < prData_1.length)) return [3 /*break*/, 11];
+                    pr = prData_1[_i];
+                    _a.label = 6;
+                case 6:
+                    _a.trys.push([6, 9, , 10]);
+                    return [4 /*yield*/, octokit.pulls.listReviews({
+                            owner: owner,
+                            repo: repo,
+                            pull_number: pr.number
+                        })];
+                case 7:
+                    reviews = _a.sent();
+                    return [4 /*yield*/, octokit.pulls.get({
+                            owner: owner,
+                            repo: repo,
+                            pull_number: pr.number
+                        })];
+                case 8:
+                    info = _a.sent();
+                    totalCodeChanges += info.data.additions + info.data.deletions;
+                    if (reviews.data.length > 0) {
+                        reviewedCodeChanges += info.data.additions + info.data.deletions;
+                    }
+                    return [3 /*break*/, 10];
+                case 9:
+                    error_6 = _a.sent();
+                    run_1.default.log({ 'level': 'error', 'message': "Error processing PR #".concat(pr.number, ": ").concat(error_6) });
+                    return [3 /*break*/, 10];
+                case 10:
+                    _i++;
+                    return [3 /*break*/, 5];
+                case 11:
+                    if (totalCodeChanges === 0) {
+                        run_1.default.log({ 'level': 'info', 'message': 'Total code changes are zero.' });
+                        return [2 /*return*/, 0]; // Avoid division by zero
+                    }
+                    return [2 /*return*/, reviewedCodeChanges / totalCodeChanges];
+            }
+        });
+    });
+}
+/* End added by Luke */
 function bus_factor_maintainer_metric(repoURL) {
     return __awaiter(this, void 0, void 0, function () {
-        var bus_factor, responsive_maintainer, url, sections;
+        var bus_factor, responsive_maintainer, dependencies, code_review, url, sections;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     bus_factor = 0;
                     responsive_maintainer = 0;
+                    dependencies = 0;
+                    code_review = 0;
                     url = repoURL.replace(/^(https?:\/\/)?(www\.)?/i, '');
                     sections = url.split('/');
                     if (!(sections[0] === 'npmjs.com')) return [3 /*break*/, 2];
@@ -255,7 +431,15 @@ function bus_factor_maintainer_metric(repoURL) {
                 case 4:
                     // Calculate responsive maintainer metric
                     responsive_maintainer = _a.sent();
-                    return [2 /*return*/, [bus_factor, responsive_maintainer]];
+                    return [4 /*yield*/, calcDependenciesMetric(sections[1], sections[2])];
+                case 5:
+                    // Calculate dependencies metric Added by Luke.
+                    dependencies = _a.sent();
+                    return [4 /*yield*/, calcCodeReviewMetric(sections[1], sections[2])];
+                case 6:
+                    // Calculate code review metric. Added by Luke.
+                    code_review = _a.sent();
+                    return [2 /*return*/, [bus_factor, responsive_maintainer, dependencies, code_review]]; // Modified by Luke.
             }
         });
     });
